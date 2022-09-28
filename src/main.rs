@@ -13,7 +13,6 @@ const VERSION: &str = "?api-version=7.1-preview.1";
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv()?;
     let password = dotenv::var(PASSWORD_KEY)?;
-
     let user = dotenv::var(USER_KEY)?;
     let url = dotenv::var(URL_KEY)?;
 
