@@ -15,7 +15,7 @@ pub struct PullRequestList {
 }
 
 #[allow(non_snake_case)]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct PullRequest {
     pub repository: PullRequestRepository,
     pub pullRequestId: i32,
@@ -40,7 +40,7 @@ pub struct PullRequest {
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct PullRequestRepository {
     pub id: uuid::Uuid,
     pub name: String,
@@ -49,7 +49,7 @@ pub struct PullRequestRepository {
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct PullRequestProject {
     pub id: uuid::Uuid,
     pub name: String,
@@ -59,7 +59,7 @@ pub struct PullRequestProject {
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct User {
     pub displayName: String,
     pub url: String,
@@ -71,19 +71,19 @@ pub struct User {
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Links {
     pub avatar: Avatar,
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Avatar {
     pub href: String,
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Reviewer {
     pub reviewerUrl: String,
     pub vote: i32,
@@ -98,25 +98,25 @@ pub struct Reviewer {
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Commit {
     pub commitId: String,
     pub url: String,
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct CompletionOptions {
     pub mergeCommitMessage: String,
     pub deleteSourceBranch: bool,
     pub squashMerge: bool,
     pub mergeStrategy: String,
-    pub transitionWorkItems: bool,
+    pub transitionWorkItems: Option<bool>,
     pub autoCompleteIgnoreConfigIds: Vec<i32>,
 }
 
 #[allow(non_snake_case)]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Repository {
     pub id: uuid::Uuid,
     pub name: String,
@@ -125,7 +125,7 @@ pub struct Repository {
     pub remoteUrl: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Project {
     pub id: uuid::Uuid,
     pub name: String,
