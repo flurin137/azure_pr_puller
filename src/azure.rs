@@ -1,6 +1,6 @@
 use reqwest::Client;
 
-use crate::models::{Repository, RepositoryList, PullRequest, PullRequestList};
+use crate::models::{PullRequest, PullRequestList, Repository, RepositoryList};
 
 const VERSION: &str = "?api-version=7.1-preview.1";
 

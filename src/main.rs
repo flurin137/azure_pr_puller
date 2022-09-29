@@ -1,9 +1,9 @@
 mod azure;
 mod models;
 
+use crate::azure::Azure;
 use dotenv::dotenv;
 use models::PullRequest;
-use crate::azure::Azure;
 
 const PASSWORD_KEY: &str = "PAT";
 const USER_KEY: &str = "USER";
@@ -31,19 +31,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let my_prs = pull_requests
             .iter()
             .filter(|x| x.createdBy.displayName == user)
-            .map(|d| d.clone());
+            .cloned();
 
         my_pull_requests.extend(my_prs);
 
         let prs_to_review = pull_requests
             .iter()
             .filter(|x| x.reviewers.iter().any(|r| r.displayName == user))
-            .map(|d| d.clone());
+            .cloned();
 
         my_pull_requests_to_review.extend(prs_to_review);
     }
 
-    println!("");
+    println!();
     println!("My Pull Requests");
     for pull_request in my_pull_requests {
         println!(
@@ -52,7 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         );
     }
 
-    println!("");
+    println!();
     println!("My Pull Requests to Review");
     for pull_request in my_pull_requests_to_review {
         println!(
