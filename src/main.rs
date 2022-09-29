@@ -47,8 +47,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("My Pull Requests");
     for pull_request in my_pull_requests {
         println!(
-            "PR \"{}\" | Repository \"{}\"",
-            pull_request.title, pull_request.repository.name
+            "Repository \"{}\" | PR \"{}\"",
+            pull_request.repository.name, pull_request.title
         );
     }
 
@@ -56,8 +56,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("My Pull Requests to Review");
     for pull_request in my_pull_requests_to_review {
         println!(
-            "PR \"{}\" | Repository \"{}\"",
-            pull_request.title, pull_request.repository.name
+            "Repository \"{}\" | PR \"{}\"",
+            pull_request.repository.name, pull_request.title
         );
     }
 
