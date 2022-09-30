@@ -107,9 +107,9 @@ pub struct Commit {
 #[allow(non_snake_case, dead_code)]
 #[derive(Debug, Deserialize, Clone)]
 pub struct CompletionOptions {
-    pub mergeCommitMessage: String,
-    pub deleteSourceBranch: bool,
-    pub squashMerge: bool,
+    pub mergeCommitMessage: Option<String>,
+    pub deleteSourceBranch: Option<bool>,
+    pub squashMerge: Option<bool>,
     pub mergeStrategy: String,
     pub transitionWorkItems: Option<bool>,
     pub autoCompleteIgnoreConfigIds: Vec<i32>,
