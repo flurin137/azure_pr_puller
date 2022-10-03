@@ -1,11 +1,13 @@
 use std::{
     error::Error,
-    fmt::{format, Display},
+    fmt::Display,
 };
 
 use reqwest::Client;
 
-use crate::models::{Project, PullRequest, PullRequestList, Repository, RepositoryList, ProjectsCollection};
+use crate::models::{
+    Project, PullRequest, PullRequestList, Repository, RepositoryList,
+};
 
 const VERSION: &str = "?api-version=7.1-preview.1";
 
@@ -90,17 +92,58 @@ impl Azure {
         Ok(pull_requests?.pull_requests)
     }
 
-    pub async fn get_clean_uri(&self, url: &str) -> Option<String> {
+    pub async fn get_clean_pull_request_url(&self, url: &str) -> Option<String> {
         let mut parts = url.split("/");
 
         parts.next()?;
         parts.next()?;
         let base_url = format!("https://{}", parts.next()?);
-        
+
         let project_guid = parts.next()?;
+        let project = self.get_project_by_id(project_guid).await?;
 
+        parts.next()?;
+        parts.next()?;
+        parts.next()?;
+
+        let repository_guid = parts.next()?;
+        let repository = self
+            .get_repository_by_guid(repository_guid, &project.name)
+            .await?;
+
+        parts.next()?;
+        let pull_request_id = parts.next()?;
+
+        let url = format!(
+            "{}/{}/_git/{}/pullRequest/{}",
+            base_url, project.name, repository.name, pull_request_id
+        );
+        Some(url)
+    }
+
+    async fn get_repository_by_guid(
+        &self,
+        repository_guid: &str,
+        project_name: &str,
+    ) -> Option<Repository> {
+        let repositories_url = format!(
+            "{}/{project_name}/_apis/git/repositories/{repository_guid}{VERSION}",
+            self.url
+        );
+
+        let response = self
+            .client
+            .get(repositories_url)
+            .basic_auth(&self.username, Some(&self.password))
+            .send()
+            .await
+            .ok()?;
+        let repository = response.json::<Repository>().await.ok()?;
+        Some(repository)
+    }
+
+    async fn get_project_by_id(&self, project_guid: &str) -> Option<Project> {
         let projects_url = format!("{}/_apis/projects/{project_guid}{VERSION}", self.url);
-
         let response = self
             .client
             .get(projects_url)
@@ -108,23 +151,7 @@ impl Azure {
             .send()
             .await
             .ok()?;
-
-        
-        let projects = response.json::<ProjectsCollection>().await.ok()?;
-        let project = projects.projects.first()?;
-
-        parts.next()?;
-        let git = parts.next()?;
-        let repos = parts.next()?;
-
-        let repository_guid = parts.next()?;
-        let pull_requests = parts.next()?;
-        let pull_request_id = parts.next()?;
-
-        let url = format!(
-            "{}/{}/{}/{}/{}/{}/{}",
-            base_url, project.name, git, repos, "", pull_requests, pull_request_id
-        );
-        Some(url)
+        let project = response.json::<Project>().await.ok()?;
+        Some(project)
     }
 }
