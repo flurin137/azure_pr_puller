@@ -1,7 +1,7 @@
 mod azure;
 mod models;
 
-use crate::azure::Azure;
+use crate::{azure::Azure, models::Reviewer};
 use dotenv::dotenv;
 use models::PullRequest;
 
@@ -21,6 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut my_pull_requests: Vec<PullRequest> = vec![];
     let mut my_pull_requests_to_review: Vec<PullRequest> = vec![];
+    let mut my_reviewed_pull_requests: Vec<PullRequest> = vec![];
 
     println!("Getting open Pull Requests for user");
 
@@ -35,12 +36,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         my_pull_requests.extend(my_prs);
 
+        let is_addressed_to_me = |r: &Reviewer| r.displayName == user;
+
         let prs_to_review = pull_requests
             .iter()
-            .filter(|x| x.reviewers.iter().any(|r| r.displayName == user))
+            .filter(|x| {
+                x.reviewers
+                    .iter()
+                    .any(|r| is_addressed_to_me(r) && r.vote == 0)
+            })
             .cloned();
 
         my_pull_requests_to_review.extend(prs_to_review);
+
+        let reviewed_pull_requests = pull_requests
+            .iter()
+            .filter(|x| {
+                x.reviewers
+                    .iter()
+                    .any(|r| is_addressed_to_me(r) && r.vote != 0)
+            })
+            .cloned();
+
+        my_reviewed_pull_requests.extend(reviewed_pull_requests);
     }
 
     println!();
@@ -55,6 +73,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!();
     println!("My Pull Requests to Review");
     for pull_request in my_pull_requests_to_review {
+        println!(
+            "Repository \"{}\" | PR \"{}\"",
+            pull_request.repository.name, pull_request.title
+        );
+    }
+
+    println!();
+    println!("My Reviewed Pull Requests");
+    for pull_request in my_reviewed_pull_requests {
         println!(
             "Repository \"{}\" | PR \"{}\"",
             pull_request.repository.name, pull_request.title
