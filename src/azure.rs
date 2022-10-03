@@ -1,8 +1,11 @@
-use std::{error::Error, fmt::Display};
+use std::{
+    error::Error,
+    fmt::{format, Display},
+};
 
 use reqwest::Client;
 
-use crate::models::{PullRequest, PullRequestList, Repository, RepositoryList};
+use crate::models::{Project, PullRequest, PullRequestList, Repository, RepositoryList, ProjectsCollection};
 
 const VERSION: &str = "?api-version=7.1-preview.1";
 
@@ -85,5 +88,43 @@ impl Azure {
         };
 
         Ok(pull_requests?.pull_requests)
+    }
+
+    pub async fn get_clean_uri(&self, url: &str) -> Option<String> {
+        let mut parts = url.split("/");
+
+        parts.next()?;
+        parts.next()?;
+        let base_url = format!("https://{}", parts.next()?);
+        
+        let project_guid = parts.next()?;
+
+        let projects_url = format!("{}/_apis/projects/{project_guid}{VERSION}", self.url);
+
+        let response = self
+            .client
+            .get(projects_url)
+            .basic_auth(&self.username, Some(&self.password))
+            .send()
+            .await
+            .ok()?;
+
+        
+        let projects = response.json::<ProjectsCollection>().await.ok()?;
+        let project = projects.projects.first()?;
+
+        parts.next()?;
+        let git = parts.next()?;
+        let repos = parts.next()?;
+
+        let repository_guid = parts.next()?;
+        let pull_requests = parts.next()?;
+        let pull_request_id = parts.next()?;
+
+        let url = format!(
+            "{}/{}/{}/{}/{}/{}/{}",
+            base_url, project.name, git, repos, "", pull_requests, pull_request_id
+        );
+        Some(url)
     }
 }

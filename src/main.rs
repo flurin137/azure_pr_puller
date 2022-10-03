@@ -58,6 +58,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             })
             .cloned();
 
+        let raw_url = "https://hamiltonreno.visualstudio.com/dce7a11c-c1b8-49c0-8a69-fe9ba5bd26b2/_apis/git/repositories/93263f89-b072-4de3-8653-939f16eda1dd/pullRequests/1671";
+        let clean_url = azure.get_clean_uri(raw_url).await;
+
+        print!("{:?}", clean_url);
+
         my_reviewed_pull_requests.extend(reviewed_pull_requests);
     }
 
@@ -84,7 +89,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     for pull_request in my_reviewed_pull_requests {
         println!(
             "Repository \"{}\" | PR \"{}\"",
-            pull_request.repository.name, pull_request.title
+            pull_request.repository.name, pull_request.url
         );
     }
 
