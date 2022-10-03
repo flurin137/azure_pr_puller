@@ -126,6 +126,13 @@ pub struct Repository {
 }
 
 #[derive(Debug, Deserialize, Clone)]
+pub struct ProjectsCollection{
+    pub count: i32,
+    #[serde(rename = "value")]
+    pub projects: Vec<Project>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
 pub struct Project {
     pub id: uuid::Uuid,
     pub name: String,

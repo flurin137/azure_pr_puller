@@ -63,30 +63,32 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!();
     println!("My Pull Requests");
-    for pull_request in my_pull_requests {
-        println!(
-            "Repository \"{}\" | PR \"{}\"",
-            pull_request.repository.name, pull_request.title
-        );
-    }
+    print_pull_requests(&azure, my_pull_requests).await;
 
     println!();
     println!("My Pull Requests to Review");
-    for pull_request in my_pull_requests_to_review {
-        println!(
-            "Repository \"{}\" | PR \"{}\"",
-            pull_request.repository.name, pull_request.title
-        );
-    }
+    print_pull_requests(&azure, my_pull_requests_to_review).await;
 
     println!();
     println!("My Reviewed Pull Requests");
-    for pull_request in my_reviewed_pull_requests {
-        println!(
-            "Repository \"{}\" | PR \"{}\"",
-            pull_request.repository.name, pull_request.title
-        );
-    }
+    print_pull_requests(&azure, my_reviewed_pull_requests).await;
 
     Ok(())
+}
+
+async fn print_pull_requests(azure: &Azure, pull_requests: Vec<PullRequest>) {
+    for pull_request in pull_requests {
+        print_pull_request(&azure, &pull_request).await;
+    }
+}
+
+async fn print_pull_request(azure: &Azure, pull_request: &PullRequest) {
+    let clean_url = azure
+        .get_clean_pull_request_url(&pull_request.url)
+        .await
+        .unwrap_or("".to_owned());
+    println!(
+        "Repository \"{}\" | PR \"{}\" | {clean_url}",
+        pull_request.repository.name, pull_request.title
+    );
 }
