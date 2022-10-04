@@ -31,7 +31,7 @@ pub struct PullRequest {
     pub mergeId: uuid::Uuid,
     pub lastMergeSourceCommit: Commit,
     pub lastMergeTargetCommit: Commit,
-    pub lastMergeCommit: Commit,
+    pub lastMergeCommit: Option<Commit>,
     pub reviewers: Vec<Reviewer>,
     pub url: String,
     pub completionOptions: Option<CompletionOptions>,
