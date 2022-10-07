@@ -1,22 +1,17 @@
 mod azure;
+mod configuration_reader;
 mod models;
 
 use crate::{azure::Azure, models::Reviewer};
-use dotenv::dotenv;
+use configuration_reader::Configuration;
 use models::PullRequest;
-
-const PASSWORD_KEY: &str = "PAT";
-const USER_KEY: &str = "USER";
-const URL_KEY: &str = "URL";
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    dotenv()?;
-    let password = dotenv::var(PASSWORD_KEY)?;
-    let user = dotenv::var(USER_KEY)?;
-    let url = dotenv::var(URL_KEY)?;
+    let config_reader = configuration_reader::ConfigurationReader::new("configuration.json");
+    let config: Configuration = config_reader.read_configuration()?;
 
-    let azure = Azure::new("", &password, &url);
+    let azure = Azure::new("", &config.password, &config.url);
     let repositories = azure.get_repositories().await?;
 
     let mut my_pull_requests: Vec<PullRequest> = vec![];
@@ -31,12 +26,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let my_prs = pull_requests
             .iter()
-            .filter(|x| x.createdBy.displayName == user)
+            .filter(|x| x.createdBy.displayName == config.username)
             .cloned();
 
         my_pull_requests.extend(my_prs);
 
-        let is_addressed_to_me = |r: &Reviewer| r.displayName == user;
+        let is_addressed_to_me = |r: &Reviewer| r.displayName == config.username;
 
         let prs_to_review = pull_requests
             .iter()
