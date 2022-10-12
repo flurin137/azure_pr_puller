@@ -1,26 +1,21 @@
+use crate::configuration::configuration_reader::ConfigurationProvider;
+use serde::de;
 use std::{error::Error, fs::File, io::BufReader};
 
-use serde::{de, Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize)]
-pub struct Configuration {
-    pub username: String,
-    pub password: String,
-    pub url: String,
-}
-
-pub struct ConfigurationReader {
+pub struct FileConfigurationProvider {
     file_name: String,
 }
 
-impl ConfigurationReader {
+impl FileConfigurationProvider {
     pub fn new(file_name: &str) -> Self {
         Self {
             file_name: file_name.to_owned(),
         }
     }
+}
 
-    pub fn read_configuration<T>(&self) -> Result<T, Box<dyn Error>>
+impl<T: de::DeserializeOwned> ConfigurationProvider<T> for FileConfigurationProvider {
+    fn get_configuration(&self) -> Result<T, Box<dyn Error>>
     where
         T: de::DeserializeOwned,
     {

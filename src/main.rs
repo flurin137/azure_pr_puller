@@ -1,15 +1,32 @@
 mod azure;
-mod configuration_reader;
+mod configuration;
 mod models;
 
-use crate::{azure::Azure, models::Reviewer};
-use configuration_reader::Configuration;
+use std::error::Error;
+
+use crate::{
+    azure::Azure,
+    configuration::{
+        configuration_reader::{ConfigurationProvider, ConfigurationReader},
+        file_configuration_provider::FileConfigurationProvider,
+        stdin_configuration_provider::StdInConfigurationProvider,
+    },
+    models::Reviewer,
+};
+use configuration::configuration::Configuration;
+
 use models::PullRequest;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let config_reader = configuration_reader::ConfigurationReader::new("configuration.json");
-    let config: Configuration = config_reader.read_configuration()?;
+async fn main() -> Result<(), Box<dyn Error>> {
+    let configuration_providers: Vec<Box<dyn ConfigurationProvider<Configuration>>> = vec![
+        Box::new(FileConfigurationProvider::new("configuration.json")),
+        Box::new(StdInConfigurationProvider::new()),
+    ];
+
+    let config_reader = ConfigurationReader::<Configuration>::new(configuration_providers);
+
+    let config = config_reader.get_configuration()?;
 
     let azure = Azure::new("", &config.password, &config.url);
     let repositories = azure.get_repositories().await?;
