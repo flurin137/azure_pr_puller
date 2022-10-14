@@ -7,26 +7,46 @@ use std::error::Error;
 use crate::{
     azure::Azure,
     configuration::{
-        configuration_reader::{ConfigurationProvider, ConfigurationReader},
-        file_configuration_provider::FileConfigurationProvider,
+        configuration_manager::ConfigurationManager, configuration_storage::ConfigurationProvider,
+        file_configuration_storage::FileConfigurationStorage,
         stdin_configuration_provider::StdInConfigurationProvider,
     },
     models::Reviewer,
 };
-use configuration::azure_configuration::AzureConfiguration;
+use configuration::{
+    azure_configuration::AzureConfiguration, configuration_storage::ConfigurationStorage,
+};
 
 use models::PullRequest;
+
+const CONFIG_FILE_PATH: &str = "configuration.json";
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let configuration_providers: Vec<Box<dyn ConfigurationProvider<AzureConfiguration>>> = vec![
-        Box::new(FileConfigurationProvider::new("configuration.json")),
+        Box::new(FileConfigurationStorage::new(CONFIG_FILE_PATH)),
         Box::new(StdInConfigurationProvider::new()),
     ];
 
-    let config_reader = ConfigurationReader::<AzureConfiguration>::new(configuration_providers);
+    let configuration_storages: Vec<Box<dyn ConfigurationStorage<AzureConfiguration>>> =
+        vec![Box::new(FileConfigurationStorage::new(CONFIG_FILE_PATH))];
+
+    let config_reader = ConfigurationManager::<AzureConfiguration>::new(
+        configuration_providers,
+        configuration_storages,
+    );
 
     let config = config_reader.get_configuration()?;
+
+    if let Err(errors) = config_reader.store_configuration(&config) {
+        let errors = errors
+            .iter()
+            .map(|d| d.to_string())
+            .collect::<Vec<String>>()
+            .join("\n");
+            
+        print!("Errors happened on storing config: {}", errors);
+    }
 
     let azure = Azure::new("", &config.password, &config.url);
     let repositories = azure.get_repositories().await?;
