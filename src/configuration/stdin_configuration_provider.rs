@@ -1,17 +1,17 @@
 use std::error::Error;
 
-use super::{configuration_reader::ConfigurationProvider, configuration::Configuration};
+use super::{azure_configuration::AzureConfiguration, configuration_reader::ConfigurationProvider};
 
 pub struct StdInConfigurationProvider;
 
-impl StdInConfigurationProvider{
-    pub fn new() -> Self{
+impl StdInConfigurationProvider {
+    pub fn new() -> Self {
         Self
     }
 }
 
-impl ConfigurationProvider<Configuration> for StdInConfigurationProvider {
-    fn get_configuration(&self) -> Result<Configuration, Box<dyn Error>> {
+impl ConfigurationProvider<AzureConfiguration> for StdInConfigurationProvider {
+    fn get_configuration(&self) -> Result<AzureConfiguration, Box<dyn Error>> {
         use std::io;
         let stdin = io::stdin();
 
@@ -27,7 +27,7 @@ impl ConfigurationProvider<Configuration> for StdInConfigurationProvider {
         let mut url = String::new();
         stdin.read_line(&mut url)?;
 
-        Ok(Configuration {
+        Ok(AzureConfiguration {
             username,
             password,
             url,

@@ -13,18 +13,18 @@ use crate::{
     },
     models::Reviewer,
 };
-use configuration::configuration::Configuration;
+use configuration::azure_configuration::AzureConfiguration;
 
 use models::PullRequest;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let configuration_providers: Vec<Box<dyn ConfigurationProvider<Configuration>>> = vec![
+    let configuration_providers: Vec<Box<dyn ConfigurationProvider<AzureConfiguration>>> = vec![
         Box::new(FileConfigurationProvider::new("configuration.json")),
         Box::new(StdInConfigurationProvider::new()),
     ];
 
-    let config_reader = ConfigurationReader::<Configuration>::new(configuration_providers);
+    let config_reader = ConfigurationReader::<AzureConfiguration>::new(configuration_providers);
 
     let config = config_reader.get_configuration()?;
 
@@ -90,7 +90,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 async fn print_pull_requests(azure: &Azure, pull_requests: Vec<PullRequest>) {
     for pull_request in pull_requests {
-        print_pull_request(&azure, &pull_request).await;
+        print_pull_request(azure, &pull_request).await;
     }
 }
 
@@ -98,7 +98,7 @@ async fn print_pull_request(azure: &Azure, pull_request: &PullRequest) {
     let clean_url = azure
         .get_clean_pull_request_url(&pull_request.url)
         .await
-        .unwrap_or("".to_owned());
+        .unwrap_or_else(|| "".to_owned());
     println!(
         "Repository \"{}\" | PR \"{}\" | {clean_url}",
         pull_request.repository.name, pull_request.title

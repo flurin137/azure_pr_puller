@@ -1,7 +1,7 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
-pub struct Configuration {
+pub struct AzureConfiguration {
     pub username: String,
     pub password: String,
     pub url: String,
