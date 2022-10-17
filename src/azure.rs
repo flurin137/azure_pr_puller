@@ -1,13 +1,8 @@
-use std::{
-    error::Error,
-    fmt::Display,
-};
+use std::{error::Error, fmt::Display};
 
 use reqwest::Client;
 
-use crate::models::{
-    Project, PullRequest, PullRequestList, Repository, RepositoryList,
-};
+use crate::models::{Project, PullRequest, PullRequestList, Repository, RepositoryList};
 
 const VERSION: &str = "?api-version=7.1-preview.1";
 
@@ -93,7 +88,7 @@ impl Azure {
     }
 
     pub async fn get_clean_pull_request_url(&self, url: &str) -> Option<String> {
-        let mut parts = url.split("/");
+        let mut parts = url.split('/');
 
         parts.next()?;
         parts.next()?;

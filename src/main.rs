@@ -1,22 +1,54 @@
 mod azure;
+mod configuration;
 mod models;
 
-use crate::{azure::Azure, models::Reviewer};
-use dotenv::dotenv;
+use std::error::Error;
+
+use crate::{
+    azure::Azure,
+    configuration::{
+        configuration_manager::ConfigurationManager, configuration_storage::ConfigurationProvider,
+        file_configuration_storage::FileConfigurationStorage,
+        stdin_configuration_provider::StdInConfigurationProvider,
+    },
+    models::Reviewer,
+};
+use configuration::{
+    azure_configuration::AzureConfiguration, configuration_storage::ConfigurationStorage,
+};
+
 use models::PullRequest;
 
-const PASSWORD_KEY: &str = "PAT";
-const USER_KEY: &str = "USER";
-const URL_KEY: &str = "URL";
+const CONFIG_FILE_PATH: &str = "configuration.json";
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    dotenv()?;
-    let password = dotenv::var(PASSWORD_KEY)?;
-    let user = dotenv::var(USER_KEY)?;
-    let url = dotenv::var(URL_KEY)?;
+async fn main() -> Result<(), Box<dyn Error>> {
+    let configuration_providers: Vec<Box<dyn ConfigurationProvider<AzureConfiguration>>> = vec![
+        Box::new(FileConfigurationStorage::new(CONFIG_FILE_PATH)),
+        Box::new(StdInConfigurationProvider::new()),
+    ];
 
-    let azure = Azure::new("", &password, &url);
+    let configuration_storages: Vec<Box<dyn ConfigurationStorage<AzureConfiguration>>> =
+        vec![Box::new(FileConfigurationStorage::new(CONFIG_FILE_PATH))];
+
+    let config_reader = ConfigurationManager::<AzureConfiguration>::new(
+        configuration_providers,
+        configuration_storages,
+    );
+
+    let config = config_reader.get_configuration()?;
+
+    if let Err(errors) = config_reader.store_configuration(&config) {
+        let errors = errors
+            .iter()
+            .map(|d| d.to_string())
+            .collect::<Vec<String>>()
+            .join("\n");
+            
+        print!("Errors happened on storing config: {}", errors);
+    }
+
+    let azure = Azure::new("", &config.password, &config.url);
     let repositories = azure.get_repositories().await?;
 
     let mut my_pull_requests: Vec<PullRequest> = vec![];
@@ -31,12 +63,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let my_prs = pull_requests
             .iter()
-            .filter(|x| x.createdBy.displayName == user)
+            .filter(|x| x.createdBy.displayName == config.username)
             .cloned();
 
         my_pull_requests.extend(my_prs);
 
-        let is_addressed_to_me = |r: &Reviewer| r.displayName == user;
+        let is_addressed_to_me = |r: &Reviewer| r.displayName == config.username;
 
         let prs_to_review = pull_requests
             .iter()
@@ -78,7 +110,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 async fn print_pull_requests(azure: &Azure, pull_requests: Vec<PullRequest>) {
     for pull_request in pull_requests {
-        print_pull_request(&azure, &pull_request).await;
+        print_pull_request(azure, &pull_request).await;
     }
 }
 
@@ -86,7 +118,7 @@ async fn print_pull_request(azure: &Azure, pull_request: &PullRequest) {
     let clean_url = azure
         .get_clean_pull_request_url(&pull_request.url)
         .await
-        .unwrap_or("".to_owned());
+        .unwrap_or_else(|| "".to_owned());
     println!(
         "Repository \"{}\" | PR \"{}\" | {clean_url}",
         pull_request.repository.name, pull_request.title
