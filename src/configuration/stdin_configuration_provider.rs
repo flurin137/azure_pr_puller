@@ -1,6 +1,8 @@
 use std::error::Error;
 
-use super::{azure_configuration::AzureConfiguration, configuration_storage::ConfigurationProvider};
+use super::{
+    azure_configuration::AzureConfiguration, configuration_storage::ConfigurationProvider,
+};
 
 pub struct StdInConfigurationProvider;
 

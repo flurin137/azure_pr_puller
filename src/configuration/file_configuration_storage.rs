@@ -1,15 +1,20 @@
 use crate::configuration::configuration_storage::ConfigurationProvider;
 use serde::{de, Serialize};
-use std::{error::Error, fs::File, io::BufReader};
+use std::{
+    error::Error,
+    fs::File,
+    io::BufReader,
+    path::{Path, PathBuf},
+};
 
 use super::configuration_storage::ConfigurationStorage;
 
 pub struct FileConfigurationStorage {
-    file_name: String,
+    file_name: PathBuf,
 }
 
 impl FileConfigurationStorage {
-    pub fn new(file_name: &str) -> Self {
+    pub fn new(file_name: &Path) -> Self {
         Self {
             file_name: file_name.to_owned(),
         }

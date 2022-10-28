@@ -41,7 +41,7 @@ impl<T> ConfigurationManager<T> {
             }
         }
 
-        if errors.len() > 0 {
+        if !errors.is_empty() {
             return Err(errors);
         }
         Ok(())
