@@ -1,4 +1,4 @@
-use crate::configuration::configuration_storage::ConfigurationProvider;
+use crate::configuration_storage::ConfigurationProvider;
 use serde::{de, Serialize};
 use std::{
     error::Error,

@@ -1,8 +1,6 @@
+use crate::azure_configuration::AzureConfiguration;
+use configuration::configuration_storage::ConfigurationProvider;
 use std::error::Error;
-
-use super::{
-    azure_configuration::AzureConfiguration, configuration_storage::ConfigurationProvider,
-};
 
 pub struct StdInConfigurationProvider;
 
@@ -33,8 +31,8 @@ impl ConfigurationProvider<AzureConfiguration> for StdInConfigurationProvider {
         url = url.trim().to_owned();
 
         Ok(AzureConfiguration {
-            username,
             password,
+            username,
             url,
         })
     }

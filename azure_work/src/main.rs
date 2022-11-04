@@ -1,24 +1,22 @@
 mod azure;
-mod configuration;
+mod azure_configuration;
 mod models;
-
-use std::error::Error;
+mod stdin_configuration_provider;
 
 use crate::{
     azure::Azure,
+    azure_configuration::AzureConfiguration,
     configuration::{
         config_file, configuration_manager::ConfigurationManager,
         configuration_storage::ConfigurationProvider,
         file_configuration_storage::FileConfigurationStorage,
-        stdin_configuration_provider::StdInConfigurationProvider,
     },
     models::Reviewer,
+    stdin_configuration_provider::StdInConfigurationProvider,
 };
-use configuration::{
-    azure_configuration::AzureConfiguration, configuration_storage::ConfigurationStorage,
-};
-
+use configuration::{self, configuration_storage::ConfigurationStorage};
 use models::PullRequest;
+use std::error::Error;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

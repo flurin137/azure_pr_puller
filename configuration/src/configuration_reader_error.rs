@@ -12,3 +12,11 @@ impl Display for ConfigurationReaderError {
 }
 
 impl Error for ConfigurationReaderError {}
+
+impl ConfigurationReaderError {
+    pub fn new_boxed(message: &str) -> Box<ConfigurationReaderError> {
+        Box::new(ConfigurationReaderError {
+            error_message: message.to_owned(),
+        })
+    }
+}
