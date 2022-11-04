@@ -5,8 +5,8 @@ use std::error::Error;
 pub struct StdInConfigurationProvider;
 
 impl StdInConfigurationProvider {
-    pub fn new() -> Self {
-        Self
+    pub fn new_boxed() -> Box<Self> {
+        Box::new(Self)
     }
 }
 

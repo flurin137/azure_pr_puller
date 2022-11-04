@@ -7,13 +7,13 @@ use super::{
 
 pub struct ConfigurationManager<T> {
     configuration_providers: Vec<Box<dyn ConfigurationProvider<T>>>,
-    configuration_storage: Vec<Box<dyn ConfigurationStorage<T>>>,
+    configuration_storage: Box<dyn ConfigurationStorage<T>>,
 }
 
 impl<T> ConfigurationManager<T> {
     pub fn new(
         configuration_providers: Vec<Box<dyn ConfigurationProvider<T>>>,
-        configuration_storage: Vec<Box<dyn ConfigurationStorage<T>>>,
+        configuration_storage: Box<dyn ConfigurationStorage<T>>,
     ) -> Self {
         ConfigurationManager {
             configuration_providers,
@@ -21,29 +21,16 @@ impl<T> ConfigurationManager<T> {
         }
     }
 
-    pub fn get_configuration(&self) -> Result<T, Box<dyn Error>> {
+    pub fn upsert_configuration(&self) -> Result<T, Box<dyn Error>> {
         for provider in self.configuration_providers.iter() {
             if let Ok(configuration) = provider.get_configuration() {
+                self.configuration_storage
+                    .store_configuration(&configuration)?;
                 return Ok(configuration);
             }
         }
 
-        let error_message = "".to_owned();
+        let error_message = "Unable to retrieve configuration".to_owned();
         Err(Box::new(ConfigurationReaderError { error_message }))
-    }
-
-    pub fn store_configuration(&self, data: &T) -> Result<(), Vec<Box<dyn Error>>> {
-        let mut errors = vec![];
-
-        for store in &self.configuration_storage {
-            if let Err(error) = store.store_configuration(data) {
-                errors.push(error)
-            }
-        }
-
-        if !errors.is_empty() {
-            return Err(errors);
-        }
-        Ok(())
     }
 }

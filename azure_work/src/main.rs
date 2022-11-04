@@ -4,45 +4,18 @@ mod models;
 mod stdin_configuration_provider;
 
 use crate::{
-    azure::Azure, azure_configuration::AzureConfiguration, models::Reviewer,
-    stdin_configuration_provider::StdInConfigurationProvider,
+    azure::Azure, models::Reviewer, stdin_configuration_provider::StdInConfigurationProvider,
 };
-use configuration::{
-    config_file, configuration_manager::ConfigurationManager,
-    file_configuration_storage::FileConfigurationStorage, ConfigurationProvider,
-    ConfigurationStorage,
-};
+use configuration::configuration_manager_factory::get_configuration_manager;
 use models::PullRequest;
 use std::error::Error;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let config_file = config_file::get_config_path()?;
+    let fallback_configuration_provider = StdInConfigurationProvider::new_boxed();
+    let configuration_manager = get_configuration_manager(fallback_configuration_provider)?;
 
-    let configuration_providers: Vec<Box<dyn ConfigurationProvider<AzureConfiguration>>> = vec![
-        Box::new(FileConfigurationStorage::new(&config_file)),
-        Box::new(StdInConfigurationProvider::new()),
-    ];
-
-    let configuration_storages: Vec<Box<dyn ConfigurationStorage<AzureConfiguration>>> =
-        vec![Box::new(FileConfigurationStorage::new(&config_file))];
-
-    let config_reader = ConfigurationManager::<AzureConfiguration>::new(
-        configuration_providers,
-        configuration_storages,
-    );
-
-    let config = config_reader.get_configuration()?;
-
-    if let Err(errors) = config_reader.store_configuration(&config) {
-        let errors = errors
-            .iter()
-            .map(|d| d.to_string())
-            .collect::<Vec<String>>()
-            .join("\n");
-
-        print!("Errors happened on storing config: {}", errors);
-    }
+    let config = configuration_manager.upsert_configuration()?;
 
     let azure = Azure::new("", &config.password, &config.url);
     let repositories = azure.get_repositories().await?;
