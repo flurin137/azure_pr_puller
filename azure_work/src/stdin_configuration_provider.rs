@@ -1,5 +1,5 @@
 use crate::azure_configuration::AzureConfiguration;
-use configuration::configuration_storage::ConfigurationProvider;
+use configuration::ConfigurationProvider;
 use std::error::Error;
 
 pub struct StdInConfigurationProvider;

@@ -1,8 +1,8 @@
 use std::error::Error;
 
 use super::{
-    configuration_reader_error::ConfigurationReaderError,
-    configuration_storage::{ConfigurationProvider, ConfigurationStorage},
+    configuration_reader_error::ConfigurationReaderError, ConfigurationProvider,
+    ConfigurationStorage,
 };
 
 pub struct ConfigurationManager<T> {

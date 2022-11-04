@@ -1,4 +1,4 @@
-use crate::configuration_storage::ConfigurationProvider;
+use crate::{ConfigurationProvider, ConfigurationStorage};
 use serde::{de, Serialize};
 use std::{
     error::Error,
@@ -6,8 +6,6 @@ use std::{
     io::BufReader,
     path::{Path, PathBuf},
 };
-
-use super::configuration_storage::ConfigurationStorage;
 
 pub struct FileConfigurationStorage {
     file_name: PathBuf,

@@ -4,17 +4,14 @@ mod models;
 mod stdin_configuration_provider;
 
 use crate::{
-    azure::Azure,
-    azure_configuration::AzureConfiguration,
-    configuration::{
-        config_file, configuration_manager::ConfigurationManager,
-        configuration_storage::ConfigurationProvider,
-        file_configuration_storage::FileConfigurationStorage,
-    },
-    models::Reviewer,
+    azure::Azure, azure_configuration::AzureConfiguration, models::Reviewer,
     stdin_configuration_provider::StdInConfigurationProvider,
 };
-use configuration::{self, configuration_storage::ConfigurationStorage};
+use configuration::{
+    config_file, configuration_manager::ConfigurationManager,
+    file_configuration_storage::FileConfigurationStorage, ConfigurationProvider,
+    ConfigurationStorage,
+};
 use models::PullRequest;
 use std::error::Error;
 
