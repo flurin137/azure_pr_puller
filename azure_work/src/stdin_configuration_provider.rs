@@ -1,14 +1,12 @@
+use crate::azure_configuration::AzureConfiguration;
+use configuration::ConfigurationProvider;
 use std::error::Error;
-
-use super::{
-    azure_configuration::AzureConfiguration, configuration_storage::ConfigurationProvider,
-};
 
 pub struct StdInConfigurationProvider;
 
 impl StdInConfigurationProvider {
-    pub fn new() -> Self {
-        Self
+    pub fn new_boxed() -> Box<Self> {
+        Box::new(Self)
     }
 }
 
@@ -33,8 +31,8 @@ impl ConfigurationProvider<AzureConfiguration> for StdInConfigurationProvider {
         url = url.trim().to_owned();
 
         Ok(AzureConfiguration {
-            username,
             password,
+            username,
             url,
         })
     }
