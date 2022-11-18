@@ -4,9 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-reqwest = { version = "0.11", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
-dotenv = "0.15.0"
-uuid = {version = "1.1.2", features = ["serde"] }
-serde = { version = "1.0", features = ["derive"] }
 configuration = { path = "../configuration" }
+azure_work_lib = { path = "../azure_work_lib" }

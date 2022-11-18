@@ -21,8 +21,7 @@ where
         fallback_provider,
     ];
 
-    let configuration_storages =
-        Box::new(FileConfigurationStorage::new(&config_file));
+    let configuration_storages = Box::new(FileConfigurationStorage::new(&config_file));
 
     let config_reader =
         ConfigurationManager::<T>::new(configuration_providers, configuration_storages);
