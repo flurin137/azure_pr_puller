@@ -1,4 +1,4 @@
-use crate::azure_configuration::AzureConfiguration;
+use azure_work_lib::azure_configuration::AzureConfiguration;
 use configuration::ConfigurationProvider;
 use std::error::Error;
 

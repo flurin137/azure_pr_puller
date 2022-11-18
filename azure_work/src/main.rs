@@ -1,13 +1,11 @@
-mod azure;
-mod azure_configuration;
-mod models;
 mod stdin_configuration_provider;
 
-use crate::{
-    azure::Azure, models::Reviewer, stdin_configuration_provider::StdInConfigurationProvider,
+use crate::stdin_configuration_provider::StdInConfigurationProvider;
+use azure_work_lib::{
+    azure::Azure,
+    models::{PullRequest, Reviewer},
 };
 use configuration::configuration_manager_factory::get_configuration_manager;
-use models::PullRequest;
 use std::error::Error;
 
 #[tokio::main]

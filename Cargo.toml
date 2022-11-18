@@ -2,5 +2,6 @@
 
 members = [ 
     "configuration",
+    "azure_work_lib",
     "azure_work",
 ]
