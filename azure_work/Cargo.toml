@@ -1,9 +1,9 @@
 [package]
 name = "azure_work"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 [dependencies]
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1.29.1", features = ["full"] }
 configuration = { path = "../configuration" }
 azure_work_lib = { path = "../azure_work_lib" }
