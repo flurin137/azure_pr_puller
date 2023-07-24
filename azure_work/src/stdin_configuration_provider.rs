@@ -15,17 +15,17 @@ impl ConfigurationProvider<AzureConfiguration> for StdInConfigurationProvider {
         use std::io;
         let stdin = io::stdin();
 
-        println!("Please enter Username (leave empty if PAT is used)");
+        println!("Please enter Username (Use the name as shown in the Azure Profile)");
         let mut username = String::new();
         stdin.read_line(&mut username)?;
         username = username.trim().to_owned();
 
-        println!("Please enter Password or PAT");
+        println!("Please enter PAT (Azure Devops User Settings -> Personal Access Tokens)");
         let mut password = String::new();
         stdin.read_line(&mut password)?;
         password = password.trim().to_owned();
 
-        println!("Please enter base url (format: https://hamiltonreno.visualstudio.com)");
+        println!("Please enter base url (format: https://dev.azure.com/your-company)");
         let mut url = String::new();
         stdin.read_line(&mut url)?;
         url = url.trim().to_owned();
