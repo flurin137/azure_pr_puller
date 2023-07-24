@@ -83,7 +83,7 @@ async fn print_pull_requests(azure: &Azure, pull_requests: Vec<PullRequest>) {
 
 async fn print_pull_request(azure: &Azure, pull_request: &PullRequest) {
     let clean_url = azure
-        .get_clean_pull_request_url(&pull_request.url)
+        .get_clean_pull_request_url(&pull_request)
         .await
         .unwrap_or_else(|| "".to_owned());
     println!(
