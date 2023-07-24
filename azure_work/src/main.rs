@@ -1,4 +1,5 @@
 mod stdin_configuration_provider;
+mod console_writer;
 
 use crate::stdin_configuration_provider::StdInConfigurationProvider;
 use azure_work_lib::{
@@ -7,9 +8,10 @@ use azure_work_lib::{
     models::{PullRequest, Repository, Reviewer},
 };
 use configuration::configuration_manager_factory::get_configuration_manager;
+use console_writer::ConsoleWriter;
 use std::error::Error;
 
-struct PullRequestInformation {
+pub struct PullRequestInformation {
     my_pull_requests: Vec<PullRequest>,
     my_pull_requests_to_review: Vec<PullRequest>,
     my_reviewed_pull_requests: Vec<PullRequest>,
@@ -27,7 +29,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let pull_request_information = get_my_pull_requests(&azure, &config, &repositories).await?;
 
-    print_pull_request_information(&azure, &pull_request_information).await;
+    let console_writer = ConsoleWriter::new(&azure);
+
+    console_writer.print_pull_request_information(&pull_request_information).await;
 
     Ok(())
 }
@@ -80,43 +84,10 @@ async fn get_my_pull_requests(
     }
 
     println!();
-    
+
     Ok(PullRequestInformation {
         my_pull_requests,
         my_pull_requests_to_review,
         my_reviewed_pull_requests,
     })
-}
-
-async fn print_pull_request_information(
-    azure: &Azure,
-    pull_request_information: &PullRequestInformation,
-) {
-    println!("My Pull Requests");
-    print_pull_requests(&azure, &pull_request_information.my_pull_requests).await;
-
-    println!();
-    println!("My Pull Requests to Review");
-    print_pull_requests(&azure, &pull_request_information.my_pull_requests_to_review).await;
-
-    println!();
-    println!("My Reviewed Pull Requests");
-    print_pull_requests(&azure, &pull_request_information.my_reviewed_pull_requests).await;
-}
-
-async fn print_pull_requests(azure: &Azure, pull_requests: &Vec<PullRequest>) {
-    for pull_request in pull_requests {
-        print_pull_request(azure, pull_request).await;
-    }
-}
-
-async fn print_pull_request(azure: &Azure, pull_request: &PullRequest) {
-    let clean_url = azure
-        .get_clean_pull_request_url(pull_request)
-        .await
-        .unwrap_or_else(|| "".to_owned());
-    println!(
-        "Repository \"{}\" | PR \"{}\" | {clean_url}",
-        pull_request.repository.name, pull_request.title
-    );
 }
