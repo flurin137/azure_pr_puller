@@ -3,10 +3,17 @@ mod stdin_configuration_provider;
 use crate::stdin_configuration_provider::StdInConfigurationProvider;
 use azure_work_lib::{
     azure::Azure,
-    models::{PullRequest, Reviewer},
+    azure_configuration::AzureConfiguration,
+    models::{PullRequest, Repository, Reviewer},
 };
 use configuration::configuration_manager_factory::get_configuration_manager;
 use std::error::Error;
+
+struct PullRequestInformation {
+    my_pull_requests: Vec<PullRequest>,
+    my_pull_requests_to_review: Vec<PullRequest>,
+    my_reviewed_pull_requests: Vec<PullRequest>,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -18,13 +25,25 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let azure = Azure::new("", &config.password, &config.url);
     let repositories = azure.get_repositories().await?;
 
+    let pull_request_information = get_my_pull_requests(&azure, &config, &repositories).await?;
+
+    print_pull_request_information(&azure, &pull_request_information).await;
+
+    Ok(())
+}
+
+async fn get_my_pull_requests(
+    azure: &Azure,
+    config: &AzureConfiguration,
+    repositories: &Vec<Repository>,
+) -> Result<PullRequestInformation, Box<dyn Error>> {
+    println!("Getting open Pull Requests for user");
+
     let mut my_pull_requests: Vec<PullRequest> = vec![];
     let mut my_pull_requests_to_review: Vec<PullRequest> = vec![];
     let mut my_reviewed_pull_requests: Vec<PullRequest> = vec![];
 
-    println!("Getting open Pull Requests for user");
-
-    for repository in &repositories {
+    for repository in repositories {
         print!(".");
         let pull_requests = azure.get_pull_requests(repository).await?;
 
@@ -61,18 +80,28 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     println!();
+    
+    Ok(PullRequestInformation {
+        my_pull_requests,
+        my_pull_requests_to_review,
+        my_reviewed_pull_requests,
+    })
+}
+
+async fn print_pull_request_information(
+    azure: &Azure,
+    pull_request_information: &PullRequestInformation,
+) {
     println!("My Pull Requests");
-    print_pull_requests(&azure, &my_pull_requests).await;
+    print_pull_requests(&azure, &pull_request_information.my_pull_requests).await;
 
     println!();
     println!("My Pull Requests to Review");
-    print_pull_requests(&azure, &my_pull_requests_to_review).await;
+    print_pull_requests(&azure, &pull_request_information.my_pull_requests_to_review).await;
 
     println!();
     println!("My Reviewed Pull Requests");
-    print_pull_requests(&azure, &my_reviewed_pull_requests).await;
-
-    Ok(())
+    print_pull_requests(&azure, &pull_request_information.my_reviewed_pull_requests).await;
 }
 
 async fn print_pull_requests(azure: &Azure, pull_requests: &Vec<PullRequest>) {

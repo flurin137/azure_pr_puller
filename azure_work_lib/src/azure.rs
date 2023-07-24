@@ -96,9 +96,6 @@ impl Azure {
             "{}/{}/_git/{}/pullRequest/{}",
             &self.url, project_name, repository_name, pull_request_id
         );
-
-        println!("{url}");
-
         Some(url)
     }
 }
