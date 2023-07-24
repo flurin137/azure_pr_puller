@@ -24,9 +24,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     println!("Getting open Pull Requests for user");
 
-    for repository in repositories {
+    for repository in &repositories {
         print!(".");
-        let pull_requests = azure.get_pull_requests(&repository).await?;
+        let pull_requests = azure.get_pull_requests(repository).await?;
 
         let my_prs = pull_requests
             .iter()
@@ -62,22 +62,22 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     println!();
     println!("My Pull Requests");
-    print_pull_requests(&azure, my_pull_requests).await;
+    print_pull_requests(&azure, &my_pull_requests).await;
 
     println!();
     println!("My Pull Requests to Review");
-    print_pull_requests(&azure, my_pull_requests_to_review).await;
+    print_pull_requests(&azure, &my_pull_requests_to_review).await;
 
     println!();
     println!("My Reviewed Pull Requests");
-    print_pull_requests(&azure, my_reviewed_pull_requests).await;
+    print_pull_requests(&azure, &my_reviewed_pull_requests).await;
 
     Ok(())
 }
 
-async fn print_pull_requests(azure: &Azure, pull_requests: Vec<PullRequest>) {
+async fn print_pull_requests(azure: &Azure, pull_requests: &Vec<PullRequest>) {
     for pull_request in pull_requests {
-        print_pull_request(azure, &pull_request).await;
+        print_pull_request(azure, pull_request).await;
     }
 }
 
