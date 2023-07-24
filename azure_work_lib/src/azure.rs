@@ -2,7 +2,7 @@ use std::{error::Error, fmt::Display};
 
 use reqwest::Client;
 
-use crate::models::{Project, PullRequest, PullRequestList, Repository, RepositoryList};
+use crate::models::{PullRequest, PullRequestList, Repository, RepositoryList};
 
 const VERSION: &str = "?api-version=7.1-preview.1";
 
@@ -87,8 +87,7 @@ impl Azure {
         Ok(pull_requests?.pull_requests)
     }
 
-    pub async fn get_clean_pull_request_url(&self, pull_request : &PullRequest) -> Option<String> {
-        
+    pub async fn get_clean_pull_request_url(&self, pull_request: &PullRequest) -> Option<String> {
         let project_name = pull_request.repository.project.name.clone();
         let repository_name = pull_request.repository.name.clone();
         let pull_request_id = pull_request.pullRequestId;
