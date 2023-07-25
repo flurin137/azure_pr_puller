@@ -1,9 +1,7 @@
-use azure_work_lib::{azure::Azure, models::PullRequest};
-
-use crate::PullRequestInformation;
+use azure_work_lib::{azure::{Azure, PullRequestInformation}, models::PullRequest};
 
 pub struct ConsoleWriter<'a> {
-    azure: &'a Azure,
+    azure: &'a Azure<'a>,
 }
 
 impl<'a> ConsoleWriter<'a> {
