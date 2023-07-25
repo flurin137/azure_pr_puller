@@ -9,8 +9,7 @@ use crate::{
 
 const VERSION: &str = "?api-version=7.1-preview.1";
 
-
-#[derive(Clone)]
+#[derive(Clone, Default, PartialEq)]
 pub struct PullRequestInformation {
     pub my_pull_requests: Vec<PullRequest>,
     pub my_pull_requests_to_review: Vec<PullRequest>,
