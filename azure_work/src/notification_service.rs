@@ -13,7 +13,10 @@ impl NotificationService {
     }
 
     pub fn notify_if_necessary(&mut self, pull_request_information: &PullRequestInformation) {
-        if pull_request_information != &self.pull_request_information {
+        if pull_request_information != &self.pull_request_information
+            && (pull_request_information.my_pull_requests.len() > 0
+                || pull_request_information.my_pull_requests_to_review.len() > 0)
+        {
             Notification::new()
                 .summary("Pull Requests To Handle")
                 .body("You have pending Pull Requests to handle")
