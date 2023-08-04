@@ -2,9 +2,19 @@ use std::{error::Error, fmt::Display};
 
 use reqwest::Client;
 
-use crate::models::{PullRequest, PullRequestList, Repository, RepositoryList};
+use crate::{
+    azure_configuration::AzureConfiguration,
+    models::{PullRequest, PullRequestList, Repository, RepositoryList, Reviewer},
+};
 
 const VERSION: &str = "?api-version=7.1-preview.1";
+
+#[derive(Clone, Default, PartialEq)]
+pub struct PullRequestInformation {
+    pub my_pull_requests: Vec<PullRequest>,
+    pub my_pull_requests_to_review: Vec<PullRequest>,
+    pub my_reviewed_pull_requests: Vec<PullRequest>,
+}
 
 #[derive(Debug)]
 struct AzureError {
@@ -24,30 +34,29 @@ impl Display for AzureError {
 
 impl Error for AzureError {}
 
-pub struct Azure {
-    url: String,
-    username: String,
-    password: String,
+pub struct Azure<'a> {
+    configuration: &'a AzureConfiguration,
     client: Client,
 }
 
-impl Azure {
-    pub fn new(username: &str, password: &str, url: &str) -> Self {
+impl<'a> Azure<'a> {
+    pub fn new(configuration: &'a AzureConfiguration) -> Self {
         Self {
-            username: username.to_owned(),
-            password: password.to_owned(),
-            url: url.to_owned(),
+            configuration,
             client: Client::new(),
         }
     }
 
     pub async fn get_repositories(&self) -> Result<Vec<Repository>, Box<dyn Error>> {
-        let url = format!("{}/_apis/git/repositories{VERSION}", self.url);
+        let url = format!("{}/_apis/git/repositories{VERSION}", self.configuration.url);
 
         let response = self
             .client
             .get(url)
-            .basic_auth(&self.username, Some(&self.password))
+            .basic_auth(
+                &self.configuration.username,
+                Some(&self.configuration.password),
+            )
             .send()
             .await?;
 
@@ -63,13 +72,16 @@ impl Azure {
         let repo_id = repository.id;
         let url = format!(
             "{}/_apis/git/repositories/{repo_id}/pullrequests{VERSION}",
-            self.url
+            self.configuration.url
         );
 
         let response = self
             .client
             .get(url)
-            .basic_auth(&self.username, Some(&self.password))
+            .basic_auth(
+                &self.configuration.username,
+                Some(&self.configuration.password),
+            )
             .send()
             .await?;
 
@@ -94,11 +106,63 @@ impl Azure {
 
         let url = format!(
             "{}/{}/_git/{}/pullRequest/{}",
-            &self.url, project_name, repository_name, pull_request_id
+            &self.configuration.url, project_name, repository_name, pull_request_id
         );
-
-        println!("{url}");
-
         Some(url)
+    }
+
+    pub async fn get_my_pull_requests(
+        &self,
+        repositories: &Vec<Repository>,
+    ) -> Result<PullRequestInformation, Box<dyn Error>> {
+        println!("Getting open Pull Requests for user");
+
+        let mut my_pull_requests: Vec<PullRequest> = vec![];
+        let mut my_pull_requests_to_review: Vec<PullRequest> = vec![];
+        let mut my_reviewed_pull_requests: Vec<PullRequest> = vec![];
+
+        for repository in repositories {
+            print!(".");
+            let pull_requests = self.get_pull_requests(repository).await?;
+
+            let my_prs = pull_requests
+                .iter()
+                .filter(|x| x.createdBy.displayName == self.configuration.username)
+                .cloned();
+
+            my_pull_requests.extend(my_prs);
+
+            let is_addressed_to_me = |r: &Reviewer| r.displayName == self.configuration.username;
+
+            let prs_to_review = pull_requests
+                .iter()
+                .filter(|x| {
+                    x.reviewers
+                        .iter()
+                        .any(|r| is_addressed_to_me(r) && r.vote == 0)
+                })
+                .cloned();
+
+            my_pull_requests_to_review.extend(prs_to_review);
+
+            let reviewed_pull_requests = pull_requests
+                .iter()
+                .filter(|x| {
+                    x.reviewers
+                        .iter()
+                        .any(|r| is_addressed_to_me(r) && r.vote != 0)
+                })
+                .cloned();
+
+            my_reviewed_pull_requests.extend(reviewed_pull_requests);
+        }
+
+        println!();
+
+        Ok(PullRequestInformation {
+            my_pull_requests,
+            my_pull_requests_to_review,
+            my_reviewed_pull_requests,
+        })
     }
 }

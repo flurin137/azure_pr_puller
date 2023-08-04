@@ -7,3 +7,4 @@ edition = "2021"
 tokio = { version = "1.29.1", features = ["full"] }
 configuration = { path = "../configuration" }
 azure_work_lib = { path = "../azure_work_lib" }
+notify-rust = "4.8.0"
