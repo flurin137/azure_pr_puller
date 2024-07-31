@@ -1,7 +1,3 @@
 [workspace]
-
-members = [ 
-    "configuration",
-    "azure_work_lib",
-    "azure_work",
-]
+resolver = "2"
+members = ["configuration", "azure_work_lib", "azure_work"]
