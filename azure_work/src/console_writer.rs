@@ -1,4 +1,7 @@
-use azure_work_lib::{azure::{Azure, PullRequestInformation}, models::PullRequest};
+use azure_work_lib::{
+    azure::{Azure, PullRequestInformation},
+    models::PullRequest,
+};
 
 pub struct ConsoleWriter<'a> {
     azure: &'a Azure<'a>,
