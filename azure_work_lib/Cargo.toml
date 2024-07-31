@@ -4,8 +4,8 @@ version = "0.1.2"
 edition = "2021"
 
 [dependencies]
-reqwest = { version = "0.11.18", features = ["json"] }
+reqwest = { version = "0.12.5", features = ["json"] }
 dotenv = "0.15.0"
-uuid = { version = "1.4.1", features = ["serde"] }
-serde = { version = "1.0.175", features = ["derive"] }
+uuid = { version = "1.10.0", features = ["serde"] }
+serde = { version = "1.0.204", features = ["derive"] }
 configuration = { path = "../configuration" }

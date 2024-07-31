@@ -4,7 +4,7 @@ version = "0.1.2"
 edition = "2021"
 
 [dependencies]
-tokio = { version = "1.29.1", features = ["full"] }
+tokio = { version = "1.39.2", features = ["full"] }
 configuration = { path = "../configuration" }
 azure_work_lib = { path = "../azure_work_lib" }
-notify-rust = "4.8.0"
+notify-rust = "4.11.0"
