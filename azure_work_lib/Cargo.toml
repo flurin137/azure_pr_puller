@@ -5,7 +5,6 @@ edition = "2021"
 
 [dependencies]
 reqwest = { version = "0.12.12", features = ["json"] }
-dotenv = "0.15.0"
 uuid = { version = "1.12.0", features = ["serde"] }
 serde = { version = "1.0.217", features = ["derive"] }
 configuration = { path = "../configuration" }
