@@ -17,7 +17,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let config = configuration_manager.upsert_configuration()?;
 
-    let azure = Azure::new(&config);
+    let azure = Azure::new(config);
     let repositories = azure.get_repositories().await?;
     let console_writer = ConsoleWriter::new(&azure);
     let mut notification_service = NotificationService::new();

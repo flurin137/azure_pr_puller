@@ -4,7 +4,7 @@ use azure_work_lib::{
 };
 
 pub struct ConsoleWriter<'a> {
-    azure: &'a Azure<'a>,
+    azure: &'a Azure,
 }
 
 impl<'a> ConsoleWriter<'a> {

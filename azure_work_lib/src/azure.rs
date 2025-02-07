@@ -34,13 +34,13 @@ impl Display for AzureError {
 
 impl Error for AzureError {}
 
-pub struct Azure<'a> {
-    configuration: &'a AzureConfiguration,
+pub struct Azure {
+    configuration: AzureConfiguration,
     client: Client,
 }
 
-impl<'a> Azure<'a> {
-    pub fn new(configuration: &'a AzureConfiguration) -> Self {
+impl Azure {
+    pub fn new(configuration: AzureConfiguration) -> Self {
         Self {
             configuration,
             client: Client::new(),
