@@ -20,7 +20,7 @@ fn greet(name: &str) -> String {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() -> Result<()> {
     let file_config_povider = FileConfigurationStorage::new(Path::new("./configuration.json"));
-    let configuration: AzureConfiguration = file_config_povider.get_configuration().unwrap();
+    let configuration: AzureConfiguration = file_config_povider.get_configuration()?;
 
     let azure = Azure::new(configuration);
     let notification_service = NotificationService::new();

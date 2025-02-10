@@ -8,3 +8,4 @@ tokio = { version = "1.43.0", features = ["full"] }
 configuration = { path = "../configuration" }
 azure_work_lib = { path = "../azure_work_lib" }
 notify-rust = "4.11.4"
+anyhow = "1.0.95"
