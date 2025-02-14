@@ -1,13 +1,13 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RepositoryList {
     pub count: i32,
     #[serde(rename = "value")]
     pub repositories: Vec<Repository>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PullRequestList {
     pub count: i32,
     #[serde(rename = "value")]
@@ -15,7 +15,7 @@ pub struct PullRequestList {
 }
 
 #[allow(non_snake_case)]
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct PullRequest {
     pub repository: PullRequestRepository,
     pub pullRequestId: i32,
@@ -40,7 +40,7 @@ pub struct PullRequest {
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct PullRequestRepository {
     pub id: uuid::Uuid,
     pub name: String,
@@ -49,7 +49,7 @@ pub struct PullRequestRepository {
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct PullRequestProject {
     pub id: uuid::Uuid,
     pub name: String,
@@ -59,7 +59,7 @@ pub struct PullRequestProject {
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct User {
     pub displayName: String,
     pub url: String,
@@ -71,19 +71,19 @@ pub struct User {
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Links {
     pub avatar: Avatar,
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Avatar {
     pub href: String,
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Reviewer {
     pub reviewerUrl: String,
     pub vote: i32,
@@ -98,14 +98,14 @@ pub struct Reviewer {
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Commit {
     pub commitId: String,
     pub url: String,
 }
 
 #[allow(non_snake_case, dead_code)]
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct CompletionOptions {
     pub mergeCommitMessage: Option<String>,
     pub deleteSourceBranch: Option<bool>,
@@ -116,7 +116,7 @@ pub struct CompletionOptions {
 }
 
 #[allow(non_snake_case)]
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Repository {
     pub id: uuid::Uuid,
     pub name: String,
@@ -125,14 +125,14 @@ pub struct Repository {
     pub remoteUrl: String,
 }
 
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct ProjectsCollection {
     pub count: i32,
     #[serde(rename = "value")]
     pub projects: Vec<Project>,
 }
 
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Project {
     pub id: uuid::Uuid,
     pub name: String,

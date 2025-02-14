@@ -1,20 +1,39 @@
 mod notification_service;
 
 use anyhow::Result;
-use azure_work_lib::{azure::Azure, azure_configuration::AzureConfiguration};
+use azure_work_lib::{
+    azure::Azure,
+    azure_configuration::AzureConfiguration,
+    models::{PullRequest, Repository},
+};
 use configuration::{file_configuration_storage::FileConfigurationStorage, ConfigurationProvider};
 use notification_service::NotificationService;
-use std::path::Path;
+use std::{
+    path::Path,
+    sync::{Arc, Mutex},
+};
 use tauri::State;
 
 struct ApplicationState {
     azure: Azure,
+    repositories: Arc<Mutex<Vec<Repository>>>,
     notification_service: NotificationService,
 }
 
 #[tauri::command]
-fn greet(name: &str) -> String {
-    "".to_owned()
+async fn get_pull_requests(state: State<'_, ApplicationState>) -> Result<Vec<PullRequest>, String> {
+    let pull_requests = vec![];
+    let mut repositories = state.repositories.lock().map_err(|e| format!("{}", e))?;
+
+    for repository in repositories.iter() {
+        let repo_pull_requests = state.azure.get_pull_requests(repository).await?;
+
+        for pull_request in repo_pull_requests {
+            pull_requests.push(pull_request);
+        }
+    }
+
+    Ok(pull_requests)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -28,12 +47,13 @@ pub fn run() -> Result<()> {
     let state = ApplicationState {
         azure,
         notification_service,
+        repositories: Arc::new(Mutex::new(vec![])),
     };
 
     tauri::Builder::default()
         .manage(state)
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![get_pull_requests])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 
