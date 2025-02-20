@@ -49,7 +49,7 @@ async fn get_pull_requests(state: State<'_, ApplicationState>) -> Result<Vec<Pul
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() -> Result<()> {
-    let file_config_povider = FileConfigurationStorage::new(Path::new("./configuration.json"));
+    let file_config_povider = FileConfigurationStorage::new(Path::new("C:\\Dev\\bin\\configuration.json"));
     let configuration: AzureConfiguration = file_config_povider.get_configuration()?;
 
     let azure = Azure::new(configuration);
