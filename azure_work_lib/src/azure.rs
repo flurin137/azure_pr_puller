@@ -64,15 +64,15 @@ impl Azure {
             .await?;
 
         match response.json::<PullRequestList>().await {
-            Ok(pull_requests) => return Ok(pull_requests.pull_requests),
+            Ok(pull_requests) => Ok(pull_requests.pull_requests),
             Err(err) => {
-                return Err(anyhow!(
+                Err(anyhow!(
                     "Unable to load Pull requests from {}. Error: {}",
                     repository.name,
                     err
-                ));
+                ))
             }
-        };
+        }
     }
 
     pub async fn get_clean_pull_request_url(&self, pull_request: &PullRequest) -> Option<String> {
