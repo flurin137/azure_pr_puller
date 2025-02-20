@@ -22,11 +22,22 @@ struct ApplicationState {
 
 #[tauri::command]
 async fn get_pull_requests(state: State<'_, ApplicationState>) -> Result<Vec<PullRequest>, String> {
-    let pull_requests = vec![];
-    let mut repositories = state.repositories.lock().map_err(|e| format!("{}", e))?;
+    let mut pull_requests = vec![];
+    let repositories;
+    {
+        repositories = state
+            .repositories
+            .lock()
+            .map_err(|e| format!("{}", e))?
+            .clone();
+    }
 
     for repository in repositories.iter() {
-        let repo_pull_requests = state.azure.get_pull_requests(repository).await?;
+        let repo_pull_requests = state
+            .azure
+            .get_pull_requests(repository)
+            .await
+            .map_err(|d| format!("{}", d))?;
 
         for pull_request in repo_pull_requests {
             pull_requests.push(pull_request);
