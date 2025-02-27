@@ -22,6 +22,9 @@ struct ApplicationState {
 
 #[tauri::command]
 async fn get_pull_requests(state: State<'_, ApplicationState>) -> Result<Vec<PullRequest>, String> {
+
+    println!("Called get_pull_requests");
+
     let mut pull_requests = vec![];
     let repositories;
     {
@@ -31,6 +34,7 @@ async fn get_pull_requests(state: State<'_, ApplicationState>) -> Result<Vec<Pul
             .map_err(|e| format!("{}", e))?
             .clone();
     }
+    println!("{:?}", repositories);
 
     for repository in repositories.iter() {
         let repo_pull_requests = state
@@ -43,9 +47,29 @@ async fn get_pull_requests(state: State<'_, ApplicationState>) -> Result<Vec<Pul
             pull_requests.push(pull_request);
         }
     }
+    println!("Returning {:?}",pull_requests);
 
     Ok(pull_requests)
 }
+
+#[tauri::command]
+async fn load_repositories(state: State<'_, ApplicationState>) -> Result<(), String> {
+    println!("Called load_repositories");
+
+    let repositories = state.azure.get_repositories().await
+        .map_err(|e| format!("{}", e))?;
+    println!("{:?}", repositories);
+
+    let mut repositories_guard = state
+        .repositories
+        .lock()
+        .map_err(|e| format!("{}", e))?;
+    
+    *repositories_guard = repositories;
+
+    Ok(())
+}
+
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() -> Result<()> {
@@ -64,7 +88,7 @@ pub fn run() -> Result<()> {
     tauri::Builder::default()
         .manage(state)
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![get_pull_requests])
+        .invoke_handler(tauri::generate_handler![get_pull_requests, load_repositories])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 

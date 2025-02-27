@@ -1,16 +1,21 @@
 <script lang="ts">
-    import { getPullRequests } from "./commands";
+    import { getPullRequests, loadRepositories } from "./commands";
     import Header from "./Header.svelte";
+    import { onMount } from "svelte";
+    import type { PullRequest } from "./interfaces";
+    import PullRequests from "./PullRequests.svelte";
+
+    let pullRequests: PullRequest[] = $state([]);
+
+    onMount(async () => {
+        await loadRepositories();
+        pullRequests = await getPullRequests();
+    });
 </script>
 
 <main class="h-full container mx-auto flex flex-col gap-5">
     <Header />
 
-    {#await getPullRequests()}
-        <p>...rolling</p>
-    {:then number}
-        <p>you rolled a {number.length}!</p>
-    {:catch error}
-        <p style="color: red">{error.message}</p>
-    {/await}
+    <PullRequests  pullRequests={pullRequests}/>
+
 </main>
