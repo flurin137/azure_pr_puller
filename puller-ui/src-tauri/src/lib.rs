@@ -50,7 +50,6 @@ async fn load_repositories(state: State<'_, ApplicationState>) -> Result<(), Str
         .get_repositories()
         .await
         .map_err(|e| format!("{}", e))?;
-    println!("{:?}", repositories);
 
     let mut repositories_guard = state.repositories.lock().map_err(|e| format!("{}", e))?;
 
