@@ -3,9 +3,10 @@ export interface RepositoryList {
     repositories: Repository[],
 }
 
-export interface PullRequestList {
-    count: number,
-    pull_requests: PullRequest[],
+export interface PullRequestInformation {
+    my_pull_requests: PullRequest[],
+    my_pull_requests_to_review: PullRequest[],
+    my_reviewed_pull_requests: PullRequest[],
 }
 
 export interface PullRequest {

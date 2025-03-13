@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { PullRequest } from './interfaces';
+import type { PullRequest, PullRequestInformation } from './interfaces';
 
-export async function getPullRequests(): Promise<PullRequest[]> {
+export async function getPullRequests(): Promise<PullRequestInformation> {
     try {
         return await invoke('get_pull_requests');
     }
