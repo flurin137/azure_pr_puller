@@ -15,6 +15,14 @@
         <div class="flex flex-col gap-1">
             <div class="font-bold">{pullRequest.pullRequestId}</div>
             <div>{pullRequest.title}</div>
+
+            {#each pullRequest.statuses as status }
+            <!-- <div>
+                ASDF 
+                {status.state}
+            </div>
+             -->
+            {/each}
         </div>
 
         <div class="flex flex-col items-end gap-1">

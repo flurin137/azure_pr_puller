@@ -29,6 +29,17 @@ export interface PullRequest {
     completionOptions: CompletionOptions | null,
     supportsIterations: boolean,
     autoCompleteSetBy: User | null,
+    statuses: Status[]
+}
+
+export interface Status {
+    iterationId: number,
+    id: number,
+    state: string | null,
+    description: string,
+    creationDate: string,
+    updatedDate: string,
+    createdBy: User,
 }
 
 export interface PullRequestRepository {
