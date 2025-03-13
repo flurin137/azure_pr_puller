@@ -9,13 +9,18 @@
 
     onMount(async () => {
         await loadRepositories();
-        pullRequests = await getPullRequests();
+
+        setInterval(async () => await loadPullRequests(), 60000);
+        await loadPullRequests();
     });
+
+    async function loadPullRequests(){
+        pullRequests = await getPullRequests();
+    }
 </script>
 
 <main class="h-full container mx-auto flex flex-col gap-5">
     <Header />
 
-    <PullRequests  pullRequests={pullRequests}/>
-
+    <PullRequests {pullRequests} />
 </main>
