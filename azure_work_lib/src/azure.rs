@@ -1,6 +1,8 @@
 use crate::{
     azure_configuration::AzureConfiguration,
-    models::{PullRequest, PullRequestList, Repository, RepositoryList, Reviewer},
+    models::{
+        PullRequest, PullRequestList, Repository, RepositoryList, Reviewer, Status, Statuses,
+    },
 };
 use anyhow::anyhow;
 use anyhow::Result;
@@ -63,15 +65,62 @@ impl Azure {
             .send()
             .await?;
 
-        match response.json::<PullRequestList>().await {
-            Ok(pull_requests) => Ok(pull_requests.pull_requests),
-            Err(err) => {
-                Err(anyhow!(
+        let mut pull_requests = response
+            .json::<PullRequestList>()
+            .await
+            .map_err(|err| {
+                anyhow!(
                     "Unable to load Pull requests from {}. Error: {}",
                     repository.name,
                     err
-                ))
-            }
+                )
+            })?
+            .pull_requests;
+
+        for request in pull_requests.iter_mut() {
+            request.statuses = match self.get_pull_request_statuses(&request).await {
+                Ok(statuses) => Some(statuses),
+                Err(err) => {
+                    println!();
+                    println!();
+                    println!("{:?}", err);
+                    println!();
+                    println!();
+                    None
+                }
+            };
+            println!("{:?}", request);
+            println!();
+        }
+
+        Ok(pull_requests)
+    }
+
+    pub async fn get_pull_request_statuses(
+        &self,
+        pull_request: &PullRequest,
+    ) -> Result<Vec<Status>> {
+        let url = format!(
+            "{}/_apis/git/repositories/{}/pullrequests/{}/statuses{VERSION}",
+            &self.configuration.url, pull_request.repository.id, pull_request.pullRequestId
+        );
+        let response = self
+            .client
+            .get(url)
+            .basic_auth(
+                &self.configuration.username,
+                Some(&self.configuration.password),
+            )
+            .send()
+            .await?;
+
+        match response.json::<Statuses>().await {
+            Ok(statuses) => Ok(statuses.value),
+            Err(err) => Err(anyhow!(
+                "Unable to get statuses from PR {}. Error: {}",
+                pull_request.pullRequestId,
+                err
+            )),
         }
     }
 
@@ -91,8 +140,6 @@ impl Azure {
         &self,
         repositories: &Vec<Repository>,
     ) -> Result<PullRequestInformation> {
-        println!("Getting open Pull Requests for user");
-
         let mut my_pull_requests: Vec<PullRequest> = vec![];
         let mut my_pull_requests_to_review: Vec<PullRequest> = vec![];
         let mut my_reviewed_pull_requests: Vec<PullRequest> = vec![];

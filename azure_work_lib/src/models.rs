@@ -37,6 +37,26 @@ pub struct PullRequest {
     pub completionOptions: Option<CompletionOptions>,
     pub supportsIterations: bool,
     pub autoCompleteSetBy: Option<User>,
+    pub statuses: Option<Vec<Status>>,
+}
+
+#[allow(non_snake_case, dead_code)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct Statuses {
+    pub value: Vec<Status>,
+    pub count: i32,
+}
+
+#[allow(non_snake_case, dead_code)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct Status {
+    pub iterationId: i32,
+    pub id: i32,
+    pub state: Option<String>,
+    pub description: String,
+    pub creationDate: String,
+    pub updatedDate: String,
+    pub createdBy: User,
 }
 
 #[allow(non_snake_case, dead_code)]
