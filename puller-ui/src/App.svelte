@@ -32,7 +32,7 @@
     }
 </script>
 
-<main class="h-full container mx-auto flex flex-col gap-5">
+<main class="h-full container mx-auto flex flex-col gap-5 p-3">
     <Header />
     {#if !loaded}
         <div class="text-5xl p-[12rem] mx-auto">...Loading...</div>

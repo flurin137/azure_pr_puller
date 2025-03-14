@@ -31,6 +31,7 @@ export interface PullRequest {
     supportsIterations: boolean,
     autoCompleteSetBy: User | null,
     statuses: Status[]
+    clean_url: string | null
 }
 
 export interface Status {
