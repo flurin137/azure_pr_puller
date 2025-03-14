@@ -76,9 +76,17 @@ export interface Avatar {
     href: string,
 }
 
+export enum Vote {
+    Approved = 10,
+    ApprovedWithSuggestions = 5,
+    NoVote = 0,
+    WaitingForAuthor = -5,
+    Rejected = -10,
+}
+
 export interface Reviewer {
     reviewerUrl: string,
-    vote: number,
+    vote: Vote,
     hasDeclined: boolean,
     isFlagged: boolean,
     displayName: string,
