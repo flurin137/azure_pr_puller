@@ -22,7 +22,7 @@
             target="_blank"
             class="flex p-4 rounded gap-4 justify-between {pullRequest.isDraft
                 ? 'bg-secondary text-secondary-content'
-                : 'bg-primary text-secondary-content'}"
+                : 'bg-primary text-primary-content'}"
         >
             <div class="flex flex-col gap-1">
                 <div class="font-bold">{pullRequest.pullRequestId}</div>
