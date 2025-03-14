@@ -32,12 +32,12 @@
     }
 </script>
 
-<main class="h-full container mx-auto flex flex-col gap-5 p-3">
+<main class="h-full container mx-auto flex flex-col">
     <Header />
     {#if !loaded}
         <div class="text-5xl p-[12rem] mx-auto">...Loading...</div>
     {:else if hasWorkToDo}
-        <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-3 p-3">
             <PullRequests
                 title="My Own Pull Requests"
                 pullRequests={my_pull_requests}
