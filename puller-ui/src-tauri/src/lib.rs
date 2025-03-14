@@ -17,7 +17,7 @@ use tauri::State;
 struct ApplicationState {
     azure: Azure,
     repositories: Arc<Mutex<Vec<Repository>>>,
-    notification_service: NotificationService,
+    notification_service: Arc<Mutex<NotificationService>>,
 }
 
 #[tauri::command]
@@ -37,6 +37,13 @@ async fn get_pull_requests(
         .get_my_pull_requests(&repositories)
         .await
         .map_err(|d| format!("{}", d))?;
+
+    let mut notifictaion_service = state
+        .notification_service
+        .lock()
+        .map_err(|e| format!("{}", e))?;
+
+    notifictaion_service.notify_if_necessary(&pull_request_information);
 
     Ok(pull_request_information)
 }
@@ -69,7 +76,7 @@ pub fn run() -> Result<()> {
 
     let state = ApplicationState {
         azure,
-        notification_service,
+        notification_service: Arc::new(Mutex::new(notification_service)),
         repositories: Arc::new(Mutex::new(vec![])),
     };
 
