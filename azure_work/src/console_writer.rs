@@ -38,14 +38,10 @@ impl<'a> ConsoleWriter<'a> {
     }
 
     async fn print_pull_request(&self, pull_request: &PullRequest) {
-        let clean_url = self
-            .azure
-            .get_clean_pull_request_url(pull_request)
-            .await
-            .unwrap_or_else(|| "".to_owned());
+        let clean_url = pull_request.clean_url.clone().unwrap_or("".to_owned());
         println!(
-            "Repository \"{}\" | PR \"{}\" | {clean_url}",
-            pull_request.repository.name, pull_request.title
+            "Repository \"{}\" | PR \"{}\" | {}",
+            pull_request.repository.name, pull_request.title, clean_url
         );
     }
 }

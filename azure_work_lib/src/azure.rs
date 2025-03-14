@@ -7,10 +7,11 @@ use crate::{
 use anyhow::anyhow;
 use anyhow::Result;
 use reqwest::Client;
+use serde::{Deserialize, Serialize};
 
 const VERSION: &str = "?api-version=7.1-preview.1";
 
-#[derive(Clone, Default, PartialEq)]
+#[derive(Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct PullRequestInformation {
     pub my_pull_requests: Vec<PullRequest>,
     pub my_pull_requests_to_review: Vec<PullRequest>,
@@ -77,20 +78,16 @@ impl Azure {
             })?
             .pull_requests;
 
-        for request in pull_requests.iter_mut() {
-            request.statuses = match self.get_pull_request_statuses(&request).await {
+        for pull_request in pull_requests.iter_mut() {
+            pull_request.statuses = match self.get_pull_request_statuses(&pull_request).await {
                 Ok(statuses) => Some(statuses),
                 Err(err) => {
-                    println!();
-                    println!();
                     println!("{:?}", err);
-                    println!();
-                    println!();
                     None
                 }
             };
-            println!("{:?}", request);
-            println!();
+
+            pull_request.clean_url = self.get_clean_pull_request_url(pull_request);
         }
 
         Ok(pull_requests)
@@ -124,7 +121,7 @@ impl Azure {
         }
     }
 
-    pub async fn get_clean_pull_request_url(&self, pull_request: &PullRequest) -> Option<String> {
+    fn get_clean_pull_request_url(&self, pull_request: &PullRequest) -> Option<String> {
         let project_name = pull_request.repository.project.name.clone();
         let repository_name = pull_request.repository.name.clone();
         let pull_request_id = pull_request.pullRequestId;
