@@ -12,7 +12,11 @@ use std::{
     path::Path,
     sync::{Arc, Mutex},
 };
-use tauri::State;
+use tauri::{
+    menu::{Menu, MenuItem},
+    tray::{MouseButton, TrayIconBuilder, TrayIconEvent},
+    Manager, State,
+};
 
 struct ApplicationState {
     azure: Azure,
@@ -81,6 +85,44 @@ pub fn run() -> Result<()> {
     };
 
     tauri::Builder::default()
+        .setup(|app| {
+            let open_command = MenuItem::with_id(app, "open", "Open", true, None::<&str>)?;
+            let quit_command = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+            let menu = Menu::with_items(app, &[&open_command, &quit_command])?;
+            TrayIconBuilder::new()
+                .menu(&menu)
+                .show_menu_on_left_click(true)
+                .icon(app.default_window_icon().unwrap().clone())
+                .on_tray_icon_event(|tray, event| match event {
+                    TrayIconEvent::DoubleClick {
+                        button: MouseButton::Left,
+                        ..
+                    } => {
+                        let app = tray.app_handle();
+                        if let Some(window) = app.get_webview_window("main") {
+                            let _ = window.unminimize();
+                            let _ = window.show();
+                            let _ = window.set_focus();
+                        }
+                    }
+                    _ => {}
+                })
+                .on_menu_event(|app, event| match event.id.as_ref() {
+                    "open" => {
+                        if let Some(window) = app.get_webview_window("main") {
+                            let _ = window.unminimize();
+                            let _ = window.show();
+                            let _ = window.set_focus();
+                        }
+                    },
+                    "quit" => {
+                        app.exit(0);
+                    }
+                    _ => {}
+                })
+                .build(app)?;
+            Ok(())
+        })
         .manage(state)
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
