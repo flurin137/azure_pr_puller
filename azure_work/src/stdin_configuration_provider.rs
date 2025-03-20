@@ -1,6 +1,6 @@
+use anyhow::Result;
 use azure_work_lib::azure_configuration::AzureConfiguration;
 use configuration::ConfigurationProvider;
-use anyhow::Result;
 
 pub struct StdInConfigurationProvider;
 

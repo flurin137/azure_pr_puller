@@ -38,7 +38,7 @@ pub struct PullRequest {
     pub supportsIterations: bool,
     pub autoCompleteSetBy: Option<User>,
     pub statuses: Option<Vec<Status>>,
-    pub clean_url: Option<String>
+    pub clean_url: Option<String>,
 }
 
 #[allow(non_snake_case, dead_code)]
