@@ -1,17 +1,8 @@
-use azure_work_lib::{
-    azure::{Azure, PullRequestInformation},
-    models::PullRequest,
-};
+use azure_work_lib::{azure::PullRequestInformation, models::PullRequest};
 
-pub struct ConsoleWriter<'a> {
-    azure: &'a Azure,
-}
+pub struct ConsoleWriter;
 
-impl<'a> ConsoleWriter<'a> {
-    pub fn new(azure: &'a Azure) -> ConsoleWriter<'a> {
-        ConsoleWriter { azure }
-    }
-
+impl ConsoleWriter {
     pub async fn print_pull_request_information(
         &self,
         pull_request_information: &PullRequestInformation,

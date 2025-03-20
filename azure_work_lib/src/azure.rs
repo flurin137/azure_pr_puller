@@ -79,7 +79,7 @@ impl Azure {
             .pull_requests;
 
         for pull_request in pull_requests.iter_mut() {
-            pull_request.statuses = match self.get_pull_request_statuses(&pull_request).await {
+            pull_request.statuses = match self.get_pull_request_statuses(pull_request).await {
                 Ok(statuses) => Some(statuses),
                 Err(err) => {
                     println!("{:?}", err);

@@ -14,7 +14,6 @@ use std::{
     sync::{Arc, Mutex},
 };
 use tauri::{
-    image::Image,
     menu::{Menu, MenuItem},
     tray::{MouseButton, TrayIconBuilder, TrayIconEvent},
     App, AppHandle, Manager, State,
@@ -90,7 +89,7 @@ pub fn run() -> Result<()> {
     };
 
     tauri::Builder::default()
-        .setup(|app| setup_system_tray(app))
+        .setup(setup_system_tray)
         .manage(state)
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
@@ -124,15 +123,15 @@ fn setup_system_tray(app: &mut App) -> Result<(), Box<dyn Error>> {
         .menu(&menu)
         .show_menu_on_left_click(true)
         .icon(app.default_window_icon().unwrap().clone())
-        .on_tray_icon_event(|tray, event| match event {
-            TrayIconEvent::DoubleClick {
+        .on_tray_icon_event(|tray, event| {
+            if let TrayIconEvent::DoubleClick {
                 button: MouseButton::Left,
                 ..
-            } => {
+            } = event
+            {
                 let app = tray.app_handle();
                 reopen_window(app);
             }
-            _ => {}
         })
         .on_menu_event(|app, event| match event.id.as_ref() {
             OPEN => reopen_window(app),
