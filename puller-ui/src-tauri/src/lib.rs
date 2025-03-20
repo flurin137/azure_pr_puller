@@ -14,7 +14,10 @@ use std::{
     sync::{Arc, Mutex},
 };
 use tauri::{
-    image::Image, menu::{Menu, MenuItem}, tray::{MouseButton, TrayIconBuilder, TrayIconEvent}, App, AppHandle, Manager, State
+    image::Image,
+    menu::{Menu, MenuItem},
+    tray::{MouseButton, TrayIconBuilder, TrayIconEvent},
+    App, AppHandle, Manager, State,
 };
 
 struct ApplicationState {
@@ -94,9 +97,14 @@ pub fn run() -> Result<()> {
             get_pull_requests,
             load_repositories
         ])
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                api.prevent_close();
+                let _ = window.hide();
+            }
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-
     Ok(())
 }
 
