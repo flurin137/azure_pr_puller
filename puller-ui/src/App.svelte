@@ -1,6 +1,5 @@
 <script lang="ts">
     import { getPullRequests, loadRepositories } from "./commands";
-    import Header from "./Header.svelte";
     import { onMount } from "svelte";
     import type { PullRequest } from "./interfaces";
     import PullRequests from "./PullRequests.svelte";
@@ -33,7 +32,6 @@
 </script>
 
 <main class="h-full container mx-auto flex flex-col">
-    <Header />
     {#if !loaded}
         <div class="text-5xl p-[12rem] mx-auto">...Loading...</div>
     {:else if hasWorkToDo}
