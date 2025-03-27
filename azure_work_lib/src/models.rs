@@ -38,6 +38,7 @@ pub struct PullRequest {
     pub supportsIterations: bool,
     pub autoCompleteSetBy: Option<User>,
     pub statuses: Option<Vec<Status>>,
+    pub comment_threads: Option<Vec<CommentThread>>,
     pub clean_url: Option<String>,
 }
 
@@ -159,4 +160,28 @@ pub struct Project {
     pub name: String,
     pub url: String,
     pub state: String,
+}
+
+#[allow(non_snake_case, dead_code)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct CommentThreads {
+    pub value: Vec<CommentThread>,
+    pub count: i32,
+}
+
+#[allow(non_snake_case, dead_code)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct CommentThread {
+    comments: Vec<Comment>,
+    id: i32,
+    status: Option<String>,
+}
+
+#[allow(non_snake_case, dead_code)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct Comment {
+    pub author: User,
+    pub commentType: String,
+    pub content: String,
+    pub id: i32,
 }

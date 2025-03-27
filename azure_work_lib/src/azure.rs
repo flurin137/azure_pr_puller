@@ -1,7 +1,7 @@
 use crate::{
     azure_configuration::AzureConfiguration,
     models::{
-        PullRequest, PullRequestList, Repository, RepositoryList, Reviewer, Status, Statuses,
+        CommentThread, CommentThreads, PullRequest, PullRequestList, Repository, RepositoryList, Reviewer, Status, Statuses
     },
 };
 use anyhow::anyhow;
@@ -87,6 +87,14 @@ impl Azure {
                 }
             };
 
+            pull_request.comment_threads = match self.get_pull_request_comment_threads(&pull_request).await {
+                Ok(threads) => Some(threads),
+                Err(err) => {
+                    println!("Error 😭😭😭 {:?}", err);
+                    None
+                }
+            };
+
             pull_request.clean_url = self.get_clean_pull_request_url(pull_request);
         }
 
@@ -115,6 +123,52 @@ impl Azure {
             Ok(statuses) => Ok(statuses.value),
             Err(err) => Err(anyhow!(
                 "Unable to get statuses from PR {}. Error: {}",
+                pull_request.pullRequestId,
+                err
+            )),
+        }
+    }
+
+    pub async fn get_pull_request_comment_threads(
+        &self,
+        pull_request: &PullRequest,
+    ) -> Result<Vec<CommentThread>> {
+        let url = format!(
+            "{}/_apis/git/repositories/{}/pullrequests/{}/threads{VERSION}",
+            &self.configuration.url, pull_request.repository.id, pull_request.pullRequestId
+        );
+
+        // let response = self
+        //     .client
+        //     .get(url)
+        //     .basic_auth(
+        //         &self.configuration.username,
+        //         Some(&self.configuration.password),
+        //     )
+        //     .send()
+        //     .await?;
+
+        // println!("{:?}", response.text().await);
+
+        // let url = format!(
+        //     "{}/_apis/git/repositories/{}/pullrequests/{}/threads{VERSION}",
+        //     &self.configuration.url, pull_request.repository.id, pull_request.pullRequestId
+        // );
+
+        let response = self
+            .client
+            .get(url)
+            .basic_auth(
+                &self.configuration.username,
+                Some(&self.configuration.password),
+            )
+            .send()
+            .await?;
+
+        match response.json::<CommentThreads>().await {
+            Ok(statuses) => Ok(statuses.value),
+            Err(err) => Err(anyhow!(
+                "Unable to get comment threads from PR {}. Error: {}",
                 pull_request.pullRequestId,
                 err
             )),
