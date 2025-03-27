@@ -131,3 +131,21 @@ export interface Project {
     url: string,
     state: string,
 }
+
+export interface CommentThreads {
+    value: CommentThread[],
+    count: number,
+}
+
+export interface CommentThread {
+    comments: Comment,
+    id: number,
+    status: string | unknown,
+}
+
+export interface Comment {
+    author: User,
+    commentType: string,
+    content: string,
+    id: number,
+}

@@ -172,9 +172,9 @@ pub struct CommentThreads {
 #[allow(non_snake_case, dead_code)]
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct CommentThread {
-    comments: Vec<Comment>,
-    id: i32,
-    status: Option<String>,
+    pub comments: Vec<Comment>,
+    pub id: i32,
+    pub status: Option<String>,
 }
 
 #[allow(non_snake_case, dead_code)]
