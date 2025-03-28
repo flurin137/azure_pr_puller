@@ -1,4 +1,5 @@
 <script lang="ts">
+    import CommentThread from "./CommentThreads.svelte";
     import VoteInfo from "./Reviewer.svelte";
     import type { PullRequest } from "./interfaces";
 
@@ -35,6 +36,8 @@
                         <VoteInfo {reviewer} />
                     {/each}
                 </div>
+                
+                <CommentThread commentThreads={pullRequest.comment_threads} />
             </div>
 
             <div class="flex flex-col items-end gap-1">

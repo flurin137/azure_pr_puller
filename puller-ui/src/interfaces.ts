@@ -31,6 +31,7 @@ export interface PullRequest {
     supportsIterations: boolean,
     autoCompleteSetBy: User | null,
     statuses: Status[]
+    comment_threads: CommentThread[],
     clean_url: string | null
 }
 
@@ -138,7 +139,7 @@ export interface CommentThreads {
 }
 
 export interface CommentThread {
-    comments: Comment,
+    comments: Comment [],
     id: number,
     status: string | unknown,
 }
