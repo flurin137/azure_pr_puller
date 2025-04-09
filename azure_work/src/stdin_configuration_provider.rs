@@ -1,6 +1,6 @@
+use anyhow::Result;
 use azure_work_lib::azure_configuration::AzureConfiguration;
 use configuration::ConfigurationProvider;
-use std::error::Error;
 
 pub struct StdInConfigurationProvider;
 
@@ -11,7 +11,7 @@ impl StdInConfigurationProvider {
 }
 
 impl ConfigurationProvider<AzureConfiguration> for StdInConfigurationProvider {
-    fn get_configuration(&self) -> Result<AzureConfiguration, Box<dyn Error>> {
+    fn get_configuration(&self) -> Result<AzureConfiguration> {
         use std::io;
         let stdin = io::stdin();
 

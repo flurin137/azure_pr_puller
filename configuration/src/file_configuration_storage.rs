@@ -1,7 +1,7 @@
 use crate::{ConfigurationProvider, ConfigurationStorage};
+use anyhow::Result;
 use serde::{de, Serialize};
 use std::{
-    error::Error,
     fs::File,
     io::BufReader,
     path::{Path, PathBuf},
@@ -20,7 +20,7 @@ impl FileConfigurationStorage {
 }
 
 impl<T: Serialize> ConfigurationStorage<T> for FileConfigurationStorage {
-    fn store_configuration(&self, data: &T) -> Result<(), Box<dyn Error>> {
+    fn store_configuration(&self, data: &T) -> Result<()> {
         let contents = serde_json::to_string_pretty(&data)?;
 
         std::fs::write(&self.file_name, contents)?;
@@ -30,7 +30,7 @@ impl<T: Serialize> ConfigurationStorage<T> for FileConfigurationStorage {
 }
 
 impl<T: de::DeserializeOwned> ConfigurationProvider<T> for FileConfigurationStorage {
-    fn get_configuration(&self) -> Result<T, Box<dyn Error>>
+    fn get_configuration(&self) -> Result<T>
     where
         T: de::DeserializeOwned,
     {

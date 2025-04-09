@@ -1,53 +1,37 @@
-use std::{error::Error, fmt::Display};
-
-use reqwest::Client;
-
 use crate::{
     azure_configuration::AzureConfiguration,
-    models::{PullRequest, PullRequestList, Repository, RepositoryList, Reviewer},
+    models::{
+        CommentThread, CommentThreads, PullRequest, PullRequestList, Repository, RepositoryList, Reviewer, Status, Statuses
+    },
 };
+use anyhow::anyhow;
+use anyhow::Result;
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
 
 const VERSION: &str = "?api-version=7.1-preview.1";
 
-#[derive(Clone, Default, PartialEq)]
+#[derive(Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct PullRequestInformation {
     pub my_pull_requests: Vec<PullRequest>,
     pub my_pull_requests_to_review: Vec<PullRequest>,
     pub my_reviewed_pull_requests: Vec<PullRequest>,
 }
 
-#[derive(Debug)]
-struct AzureError {
-    error_message: String,
-    inner_error: Box<dyn Error>,
-}
-
-impl Display for AzureError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}, Inner error: {}",
-            self.error_message, self.inner_error
-        )
-    }
-}
-
-impl Error for AzureError {}
-
-pub struct Azure<'a> {
-    configuration: &'a AzureConfiguration,
+pub struct Azure {
+    configuration: AzureConfiguration,
     client: Client,
 }
 
-impl<'a> Azure<'a> {
-    pub fn new(configuration: &'a AzureConfiguration) -> Self {
+impl Azure {
+    pub fn new(configuration: AzureConfiguration) -> Self {
         Self {
             configuration,
             client: Client::new(),
         }
     }
 
-    pub async fn get_repositories(&self) -> Result<Vec<Repository>, Box<dyn Error>> {
+    pub async fn get_repositories(&self) -> Result<Vec<Repository>> {
         let url = format!("{}/_apis/git/repositories{VERSION}", self.configuration.url);
 
         let response = self
@@ -65,10 +49,7 @@ impl<'a> Azure<'a> {
         Ok(repository_list.repositories)
     }
 
-    pub async fn get_pull_requests(
-        &self,
-        repository: &Repository,
-    ) -> Result<Vec<PullRequest>, Box<dyn Error>> {
+    pub async fn get_pull_requests(&self, repository: &Repository) -> Result<Vec<PullRequest>> {
         let repo_id = repository.id;
         let url = format!(
             "{}/_apis/git/repositories/{repo_id}/pullrequests{VERSION}",
@@ -85,21 +66,116 @@ impl<'a> Azure<'a> {
             .send()
             .await?;
 
-        let pull_requests = match response.json::<PullRequestList>().await {
-            Ok(pull_requests) => Ok(pull_requests),
-            Err(err) => {
-                let message = format!("Unable to load Pull requests from {}", repository.name);
-                Err(AzureError {
-                    error_message: message,
-                    inner_error: Box::new(err),
-                })
-            }
-        };
+        let mut pull_requests = response
+            .json::<PullRequestList>()
+            .await
+            .map_err(|err| {
+                anyhow!(
+                    "Unable to load Pull requests from {}. Error: {}",
+                    repository.name,
+                    err
+                )
+            })?
+            .pull_requests;
 
-        Ok(pull_requests?.pull_requests)
+        for pull_request in pull_requests.iter_mut() {
+            pull_request.statuses = match self.get_pull_request_statuses(pull_request).await {
+                Ok(statuses) => Some(statuses),
+                Err(err) => {
+                    println!("{:?}", err);
+                    None
+                }
+            };
+
+            pull_request.comment_threads = match self.get_pull_request_comment_threads(&pull_request).await {
+                Ok(threads) => Some(threads),
+                Err(err) => {
+                    println!("Error 😭😭😭 {:?}", err);
+                    None
+                }
+            };
+
+            pull_request.clean_url = self.get_clean_pull_request_url(pull_request);
+        }
+
+        Ok(pull_requests)
     }
 
-    pub async fn get_clean_pull_request_url(&self, pull_request: &PullRequest) -> Option<String> {
+    pub async fn get_pull_request_statuses(
+        &self,
+        pull_request: &PullRequest,
+    ) -> Result<Vec<Status>> {
+        let url = format!(
+            "{}/_apis/git/repositories/{}/pullrequests/{}/statuses{VERSION}",
+            &self.configuration.url, pull_request.repository.id, pull_request.pullRequestId
+        );
+        let response = self
+            .client
+            .get(url)
+            .basic_auth(
+                &self.configuration.username,
+                Some(&self.configuration.password),
+            )
+            .send()
+            .await?;
+
+        match response.json::<Statuses>().await {
+            Ok(statuses) => Ok(statuses.value),
+            Err(err) => Err(anyhow!(
+                "Unable to get statuses from PR {}. Error: {}",
+                pull_request.pullRequestId,
+                err
+            )),
+        }
+    }
+
+    pub async fn get_pull_request_comment_threads(
+        &self,
+        pull_request: &PullRequest,
+    ) -> Result<Vec<CommentThread>> {
+        let url = format!(
+            "{}/_apis/git/repositories/{}/pullrequests/{}/threads{VERSION}",
+            &self.configuration.url, pull_request.repository.id, pull_request.pullRequestId
+        );
+
+        // let response = self
+        //     .client
+        //     .get(url)
+        //     .basic_auth(
+        //         &self.configuration.username,
+        //         Some(&self.configuration.password),
+        //     )
+        //     .send()
+        //     .await?;
+
+        // println!("{:?}", response.text().await);
+
+        // let url = format!(
+        //     "{}/_apis/git/repositories/{}/pullrequests/{}/threads{VERSION}",
+        //     &self.configuration.url, pull_request.repository.id, pull_request.pullRequestId
+        // );
+
+        let response = self
+            .client
+            .get(url)
+            .basic_auth(
+                &self.configuration.username,
+                Some(&self.configuration.password),
+            )
+            .send()
+            .await?;
+
+        match response.json::<CommentThreads>().await {
+            Ok(statuses) => Ok(statuses.value),
+            Err(err) => Err(anyhow!(
+                "Unable to get comment threads from PR {}. Error: {}",
+                pull_request.pullRequestId,
+                err
+            )),
+        }
+    }
+
+    fn get_clean_pull_request_url(&self, pull_request: &PullRequest) -> Option<String> {
         let project_name = pull_request.repository.project.name.clone();
         let repository_name = pull_request.repository.name.clone();
         let pull_request_id = pull_request.pullRequestId;
@@ -114,9 +190,7 @@ impl<'a> Azure<'a> {
     pub async fn get_my_pull_requests(
         &self,
         repositories: &Vec<Repository>,
-    ) -> Result<PullRequestInformation, Box<dyn Error>> {
-        println!("Getting open Pull Requests for user");
-
+    ) -> Result<PullRequestInformation> {
         let mut my_pull_requests: Vec<PullRequest> = vec![];
         let mut my_pull_requests_to_review: Vec<PullRequest> = vec![];
         let mut my_reviewed_pull_requests: Vec<PullRequest> = vec![];
