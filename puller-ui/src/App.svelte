@@ -3,6 +3,9 @@
     import { onMount } from "svelte";
     import type { PullRequest } from "./interfaces";
     import PullRequests from "./PullRequests.svelte";
+    import Configuration from "./Configuration.svelte";
+
+    let is_configured = $state(false);
 
     let my_pull_requests: PullRequest[] = $state([]);
     let my_pull_requests_to_review: PullRequest[] = $state([]);
@@ -31,11 +34,13 @@
     }
 </script>
 
-<main class="h-full container mx-auto flex flex-col">
+<main class="h-full container mx-auto flex flex-col p-3">
     {#if !loaded}
         <div class="text-5xl p-[12rem] mx-auto">...Loading...</div>
+    {:else if !is_configured}
+        <Configuration/>
     {:else if hasWorkToDo}
-        <div class="flex flex-col gap-3 p-3">
+        <div class="flex flex-col gap-3">
             <PullRequests
                 title="My Own Pull Requests"
                 pullRequests={my_pull_requests}

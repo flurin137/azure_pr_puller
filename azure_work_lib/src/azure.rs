@@ -1,7 +1,10 @@
+use std::time::Duration;
+
 use crate::{
     azure_configuration::AzureConfiguration,
     models::{
-        CommentThread, CommentThreads, PullRequest, PullRequestList, Repository, RepositoryList, Reviewer, Status, Statuses
+        CommentThread, CommentThreads, PullRequest, PullRequestList, Repository, RepositoryList,
+        Reviewer, Status, Statuses,
     },
 };
 use anyhow::anyhow;
@@ -29,6 +32,25 @@ impl Azure {
             configuration,
             client: Client::new(),
         }
+    }
+
+    pub async fn test_configuration(&self, configuration: AzureConfiguration) -> bool {
+        let url = format!("{}/_apis/profile/profiles/me{VERSION}", configuration.url);
+
+        println!("{}", url);
+        let response = self
+            .client
+            .get(url)
+            .basic_auth(configuration.username, Some(configuration.password))
+            .timeout(Duration::from_secs(5))
+            .send()
+            .await;
+
+        if let Ok(response) = response {
+            return response.status().is_success();
+        }
+
+        false
     }
 
     pub async fn get_repositories(&self) -> Result<Vec<Repository>> {
@@ -87,13 +109,14 @@ impl Azure {
                 }
             };
 
-            pull_request.comment_threads = match self.get_pull_request_comment_threads(&pull_request).await {
-                Ok(threads) => Some(threads),
-                Err(err) => {
-                    println!("Error 😭😭😭 {:?}", err);
-                    None
-                }
-            };
+            pull_request.comment_threads =
+                match self.get_pull_request_comment_threads(&pull_request).await {
+                    Ok(threads) => Some(threads),
+                    Err(err) => {
+                        println!("Error 😭😭😭 {:?}", err);
+                        None
+                    }
+                };
 
             pull_request.clean_url = self.get_clean_pull_request_url(pull_request);
         }
@@ -137,23 +160,6 @@ impl Azure {
             "{}/_apis/git/repositories/{}/pullrequests/{}/threads{VERSION}",
             &self.configuration.url, pull_request.repository.id, pull_request.pullRequestId
         );
-
-        // let response = self
-        //     .client
-        //     .get(url)
-        //     .basic_auth(
-        //         &self.configuration.username,
-        //         Some(&self.configuration.password),
-        //     )
-        //     .send()
-        //     .await?;
-
-        // println!("{:?}", response.text().await);
-
-        // let url = format!(
-        //     "{}/_apis/git/repositories/{}/pullrequests/{}/threads{VERSION}",
-        //     &self.configuration.url, pull_request.repository.id, pull_request.pullRequestId
-        // );
 
         let response = self
             .client

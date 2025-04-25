@@ -70,6 +70,20 @@ async fn load_repositories(state: State<'_, ApplicationState>) -> Result<(), Str
     Ok(())
 }
 
+#[tauri::command]
+async fn test_configuration(
+    state: State<'_, ApplicationState>,
+    configuration: AzureConfiguration,
+) -> Result<bool, String> {
+    println!("Called test_configuration");
+
+    let result = state.azure.test_configuration(configuration).await;
+
+    print!("{}", result);
+
+    Ok(result)
+}
+
 const OPEN: &str = "open_command";
 const QUIT: &str = "quit_command";
 
@@ -94,7 +108,8 @@ pub fn run() -> Result<()> {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             get_pull_requests,
-            load_repositories
+            load_repositories,
+            test_configuration
         ])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {

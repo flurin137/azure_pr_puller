@@ -150,3 +150,10 @@ export interface Comment {
     content: string,
     id: number,
 }
+
+
+export interface ConnectionConfiguration {
+    username: String,
+    password: String,
+    url: String,
+}
