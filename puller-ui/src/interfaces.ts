@@ -153,7 +153,7 @@ export interface Comment {
 
 
 export interface ConnectionConfiguration {
-    username: String,
-    password: String,
-    url: String,
+    username: string,
+    password: string,
+    url: string,
 }

@@ -20,6 +20,7 @@ use tauri::{
 };
 
 struct ApplicationState {
+    configuration: AzureConfiguration,
     azure: Azure,
     repositories: Arc<Mutex<Vec<Repository>>>,
     notification_service: Arc<Mutex<NotificationService>>,
@@ -84,6 +85,33 @@ async fn test_configuration(
     Ok(result)
 }
 
+#[tauri::command]
+async fn get_configuration(
+    state: State<'_, ApplicationState>,
+) -> Result<AzureConfiguration, String> {
+    println!("Called get_configuration");
+
+    let result = state.configuration.clone();
+
+    println!("{:?}", result);
+
+    Ok(result)
+}
+
+#[tauri::command]
+async fn save_configuration(
+    state: State<'_, ApplicationState>,
+    configuration: AzureConfiguration,
+) -> Result<bool, String> {
+    println!("Called save_configuration");
+
+    let result = state.azure.test_configuration(configuration).await;
+
+    print!("{}", result);
+
+    Ok(result)
+}
+
 const OPEN: &str = "open_command";
 const QUIT: &str = "quit_command";
 
@@ -93,13 +121,14 @@ pub fn run() -> Result<()> {
         FileConfigurationStorage::new(Path::new("C:\\Dev\\bin\\configuration.json"));
     let configuration: AzureConfiguration = file_config_povider.get_configuration()?;
 
-    let azure = Azure::new(configuration);
+    let azure = Azure::new(configuration.clone());
     let notification_service = NotificationService::new();
 
     let state = ApplicationState {
         azure,
         notification_service: Arc::new(Mutex::new(notification_service)),
         repositories: Arc::new(Mutex::new(vec![])),
+        configuration,
     };
 
     tauri::Builder::default()
@@ -109,7 +138,8 @@ pub fn run() -> Result<()> {
         .invoke_handler(tauri::generate_handler![
             get_pull_requests,
             load_repositories,
-            test_configuration
+            test_configuration,
+            get_configuration
         ])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {

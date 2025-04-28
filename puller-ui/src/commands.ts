@@ -32,6 +32,16 @@ export async function testConfiguration(configuration: ConnectionConfiguration):
     }
 }
 
+export async function getConfiguration() : Promise<ConnectionConfiguration> {
+    try {
+        return await invoke('get_configuration');
+    }
+    catch (ex) {
+        console.log(ex)
+        throw "";
+    }
+}
+
 export async function saveConfiguration(configuration: ConnectionConfiguration) {
     try {
         return await invoke('save_configuration', { configuration: configuration });
