@@ -35,7 +35,7 @@ impl Azure {
     }
 
     pub async fn test_configuration(&self, configuration: AzureConfiguration) -> bool {
-        let url = format!("{}/_apis/profile/profiles/me{VERSION}", configuration.url);
+        let url = format!("{}/_apis/projects{VERSION}", configuration.url);
 
         println!("{}", url);
         let response = self
